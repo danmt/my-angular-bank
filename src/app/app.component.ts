@@ -1,14 +1,20 @@
 import { Component } from '@angular/core';
 import { RouterModule } from '@angular/router';
-import { NxWelcomeComponent } from './nx-welcome.component';
+import { HdWalletMultiButtonComponent } from '@heavy-duty/wallet-adapter-material';
 
 @Component({
   standalone: true,
-  imports: [NxWelcomeComponent, RouterModule],
+  imports: [RouterModule, HdWalletMultiButtonComponent],
   selector: 'my-bank-root',
-  templateUrl: './app.component.html',
-  styleUrls: ['./app.component.scss'],
+  template: `
+    <header>
+      <h1>My Bank</h1>
+
+      <hd-wallet-multi-button></hd-wallet-multi-button>
+    </header>
+
+    <main></main>
+  `,
+  styles: [],
 })
-export class AppComponent {
-  title = 'my-bank';
-}
+export class AppComponent {}
