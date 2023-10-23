@@ -3,6 +3,7 @@ import { Component, inject } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
 import { MatDialogRef } from '@angular/material/dialog';
 import { MatIconModule } from '@angular/material/icon';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { ConnectionStore, WalletStore } from '@heavy-duty/wallet-adapter';
 import { PushPipe } from '@ngrx/component';
@@ -42,6 +43,10 @@ import {
         *ngIf="isRunning"
         class="absolute w-full h-full z-20 top-0 left-0 bg-white bg-opacity-80 flex justify-center items-center flex-col gap-4"
       >
+        <mat-progress-spinner
+          mode="indeterminate"
+          diameter="64"
+        ></mat-progress-spinner>
         <span> Processing transfer... </span>
       </div>
     </div>
@@ -51,6 +56,7 @@ import {
     NgIf,
     MatButtonModule,
     MatIconModule,
+    MatProgressSpinnerModule,
     PushPipe,
     TransferFormComponent,
   ],

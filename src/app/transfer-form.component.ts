@@ -64,7 +64,7 @@ export interface TransferFormPayload {
           mat-raised-button
           color="primary"
         >
-          Deposit
+          Send
         </button>
       </div>
     </form>

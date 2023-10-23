@@ -1,6 +1,7 @@
 import { DecimalPipe, NgIf } from '@angular/common';
 import { Component, OnInit, inject } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
+import { MatCardModule } from '@angular/material/card';
 import { MatDialog } from '@angular/material/dialog';
 import { ConnectionStore, WalletStore } from '@heavy-duty/wallet-adapter';
 import {
@@ -24,6 +25,7 @@ import { TransferModalComponent } from './transfer-modal.component';
     NgIf,
     DecimalPipe,
     MatButtonModule,
+    MatCardModule,
     LetDirective,
     HdWalletMultiButtonComponent,
     HdWalletModalTriggerDirective,
@@ -33,48 +35,53 @@ import { TransferModalComponent } from './transfer-modal.component';
   ],
   selector: 'my-bank-root',
   template: `
-    <header>
-      <h1>My Bank</h1>
+    <mat-card class="mx-auto my-8 px-4 py-8 w-full max-w-[500px]">
+      <header class="mb-8">
+        <h1 class="text-5xl text-center mb-4">My Bank</h1>
 
-      <hd-wallet-multi-button></hd-wallet-multi-button>
-    </header>
-
-    <main>
-      <div *ngrxLet="balance$; let balance">
-        <h2 class="text-center">Balance</h2>
-
-        <div class="flex justify-center items-center gap-2">
-          <img src="assets/usdc-logo.png" class="w-12 h-12" />
-
-          <p class="text-4xl">
-            <ng-container *ngIf="balance !== null; else balanceNotFound">
-              {{ balance | hdToUserValue : 6 | number : '2.2-2' }}
-            </ng-container>
-            <ng-template #balanceNotFound>-</ng-template>
-          </p>
+        <div class="flex justify-center">
+          <hd-wallet-multi-button></hd-wallet-multi-button>
         </div>
+      </header>
 
-        <div
-          *hdWalletAdapter="let publicKey = publicKey; let wallets = wallets"
-        >
-          <button
-            (click)="
-              publicKey ? onTransfer() : hdWalletModalTrigger.open(wallets)
-            "
-            mat-raised-button
-            color="primary"
-            hdSelectAndConnectWallet
-            #hdSelectAndConnectWallet="hdSelectAndConnectWallet"
-            hdWalletModalTrigger
-            #hdWalletModalTrigger="hdWalletModalTrigger"
-            (hdSelectWallet)="hdSelectAndConnectWallet.run($event)"
-            (hdWalletConnected)="onTransfer()"
+      <main>
+        <div *ngrxLet="balance$; let balance">
+          <h2 class="text-2xl text-center mb-4">Balance</h2>
+
+          <div class="flex justify-center items-center gap-2 mb-4">
+            <img src="assets/usdc-logo.png" class="w-12 h-12" />
+
+            <p class="text-4xl">
+              <ng-container *ngIf="balance !== null; else balanceNotFound">
+                {{ balance | hdToUserValue : 6 | number : '2.2-2' }}
+              </ng-container>
+              <ng-template #balanceNotFound>-</ng-template>
+            </p>
+          </div>
+
+          <div
+            *hdWalletAdapter="let publicKey = publicKey; let wallets = wallets"
+            class="flex justify-center"
           >
-            Transfer
-          </button>
+            <button
+              (click)="
+                publicKey ? onTransfer() : hdWalletModalTrigger.open(wallets)
+              "
+              mat-raised-button
+              color="primary"
+              hdSelectAndConnectWallet
+              #hdSelectAndConnectWallet="hdSelectAndConnectWallet"
+              hdWalletModalTrigger
+              #hdWalletModalTrigger="hdWalletModalTrigger"
+              (hdSelectWallet)="hdSelectAndConnectWallet.run($event)"
+              (hdWalletConnected)="onTransfer()"
+            >
+              Transfer
+            </button>
+          </div>
         </div>
-      </div>
-    </main>
+      </main>
+    </mat-card>
   `,
   styles: [],
 })
