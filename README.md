@@ -18,15 +18,15 @@ Users can trasnfer USDC by clicking a button that opens a modal that prompts for
 
 NOTE: If there's no wallet connect, the user is prompted to connect one.
 
+## Memos
+
+Whenever a transaction is sent, a memo can be attached to make it easier to identify the purpose of a transaction. Transfers have a field to enter such information when transfering. For payments, this is automatically filled using the link values.
+
 ## Request Payment in USDC (WIP)
 
 Users can request a payment in USDC by clicking a button that opens a modal that prompts for an amount. This generates a link that can be shared to the payer. Opening a payment link automatically opens the transfer modal with the values provided in the link as defaults.
 
 NOTE: If there's no wallet connect, the user is prompted to connect one.
-
-## Memos (WIP)
-
-Whenever a transaction is sent, a memo can be attached to make it easier to identify the purpose of a transaction. Transfers have a field to enter such information when transfering. For payments, this is automatically filled using the link values.
 
 ## QR Codes and Solana Pay (WIP)
 

@@ -13,6 +13,7 @@ import {
 } from '@solana/spl-token';
 import {
   PublicKey,
+  TransactionInstruction,
   TransactionMessage,
   VersionedTransaction,
 } from '@solana/web3.js';
@@ -113,6 +114,15 @@ export class TransferModalComponent {
           senderWalletPubkey,
           payload.amount
         ),
+        new TransactionInstruction({
+          keys: [
+            { pubkey: senderWalletPubkey, isSigner: true, isWritable: true },
+          ],
+          data: Buffer.from(payload.memo, 'utf-8'),
+          programId: new PublicKey(
+            'MemoSq4gqABAXKb96qnH8TysNcWxMyWCqXgDLGmfcHr'
+          ),
+        }),
       ];
       const transferTransactionMessage = new TransactionMessage({
         payerKey: senderWalletPubkey,

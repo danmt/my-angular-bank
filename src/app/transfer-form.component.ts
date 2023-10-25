@@ -11,11 +11,13 @@ import { MatInputModule } from '@angular/material/input';
 export interface TransferFormModel {
   receiver: string | null;
   amount: number | null;
+  memo: string | null;
 }
 
 export interface TransferFormPayload {
   receiver: string;
   amount: number;
+  memo: string;
 }
 
 @Component({
@@ -35,6 +37,20 @@ export interface TransferFormPayload {
           *ngIf="form.submitted && receiverControl.errors?.['required']"
         >
           Receiver is required.
+        </mat-error>
+      </mat-form-field>
+
+      <mat-form-field appearance="fill" class="w-full">
+        <mat-label>Memo</mat-label>
+        <input
+          matInput
+          name="memo"
+          [(ngModel)]="model.memo"
+          #memoControl="ngModel"
+          required
+        />
+        <mat-error *ngIf="form.submitted && memoControl.errors?.['required']">
+          Memo is required.
         </mat-error>
       </mat-form-field>
 
@@ -84,6 +100,7 @@ export class TransferFormComponent {
   @Input() model: TransferFormModel = {
     receiver: null,
     amount: null,
+    memo: null,
   };
   @Input() disabled = false;
   @Output() transfer = new EventEmitter<TransferFormPayload>();
@@ -92,7 +109,8 @@ export class TransferFormComponent {
     if (
       form.invalid ||
       this.model.amount === null ||
-      this.model.receiver === null
+      this.model.receiver === null ||
+      this.model.memo === null
     ) {
       this._matSnackBar.open('Invalid data, review form entries.', 'close', {
         duration: 3000,
@@ -101,6 +119,7 @@ export class TransferFormComponent {
       this.transfer.emit({
         amount: fromUserValue(this.model.amount, 6),
         receiver: this.model.receiver,
+        memo: this.model.memo,
       });
     }
   }
