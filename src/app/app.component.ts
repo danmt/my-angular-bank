@@ -3,19 +3,37 @@ import { Component, OnInit, inject } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
 import { MatDialog } from '@angular/material/dialog';
-import { ConnectionStore, WalletStore } from '@heavy-duty/wallet-adapter';
+import {
+  ConnectionStore,
+  Wallet,
+  WalletStore,
+} from '@heavy-duty/wallet-adapter';
 import {
   HdSelectAndConnectWalletDirective,
   HdWalletAdapterDirective,
 } from '@heavy-duty/wallet-adapter-cdk';
 import {
+  HdWalletModalComponent,
   HdWalletModalTriggerDirective,
   HdWalletMultiButtonComponent,
 } from '@heavy-duty/wallet-adapter-material';
 import { LetDirective } from '@ngrx/component';
 import { getAccount, getAssociatedTokenAddressSync } from '@solana/spl-token';
+import { WalletName } from '@solana/wallet-adapter-base';
 import { PublicKey } from '@solana/web3.js';
-import { BehaviorSubject, combineLatest, concatMap } from 'rxjs';
+import {
+  BehaviorSubject,
+  combineLatest,
+  concatMap,
+  firstValueFrom,
+  lastValueFrom,
+} from 'rxjs';
+import {
+  PaymentRequestModalComponent,
+  PaymentRequestModalData,
+} from './payment-request-modal.component';
+import { RequestPaymentFormPayload } from './request-payment-form.component';
+import { RequestPaymentModalComponent } from './request-payment-modal.component';
 import { ToUserValuePipe } from './to-user-value.pipe';
 import { TransferModalComponent } from './transfer-modal.component';
 
@@ -61,7 +79,7 @@ import { TransferModalComponent } from './transfer-modal.component';
 
           <div
             *hdWalletAdapter="let publicKey = publicKey; let wallets = wallets"
-            class="flex justify-center"
+            class="flex justify-center gap-2"
           >
             <button
               (click)="
@@ -77,6 +95,14 @@ import { TransferModalComponent } from './transfer-modal.component';
               (hdWalletConnected)="onTransfer()"
             >
               Transfer
+            </button>
+
+            <button
+              (click)="onRequestPayment()"
+              mat-raised-button
+              color="primary"
+            >
+              Request Payment
             </button>
           </div>
         </div>
@@ -134,5 +160,73 @@ export class AppComponent implements OnInit {
           this._reload.next(null);
         }
       });
+  }
+
+  async onRequestPayment() {
+    let requesterWalletPubkey = await firstValueFrom(
+      this._walletStore.publicKey$
+    );
+
+    if (!requesterWalletPubkey) {
+      const wallets = await firstValueFrom(this._walletStore.wallets$);
+      const walletName = await lastValueFrom(
+        this._matDialog
+          .open<HdWalletModalComponent, { wallets: Wallet[] }, WalletName>(
+            HdWalletModalComponent,
+            {
+              panelClass: ['wallet-modal'],
+              maxWidth: '380px',
+              maxHeight: '90vh',
+              data: {
+                wallets,
+              },
+            }
+          )
+          .afterClosed()
+      );
+
+      if (!walletName) {
+        return;
+      }
+
+      this._walletStore.selectWallet(walletName);
+      await firstValueFrom(this._walletStore.connect());
+
+      requesterWalletPubkey = await firstValueFrom(
+        this._walletStore.publicKey$
+      );
+
+      if (!requesterWalletPubkey) {
+        throw new Error('Wallet not connected');
+      }
+    }
+
+    const requestPaymentPayload = await lastValueFrom(
+      this._matDialog
+        .open<RequestPaymentModalComponent, {}, RequestPaymentFormPayload>(
+          RequestPaymentModalComponent,
+          {}
+        )
+        .afterClosed()
+    );
+
+    if (!requestPaymentPayload) {
+      return;
+    }
+
+    await lastValueFrom(
+      this._matDialog
+        .open<PaymentRequestModalComponent, PaymentRequestModalData>(
+          PaymentRequestModalComponent,
+          {
+            data: {
+              amount: 100,
+              memo: 'hello world',
+              requesterPublicKey: PublicKey.default,
+            },
+          }
+        )
+        .afterClosed()
+    );
   }
 }
