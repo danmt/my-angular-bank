@@ -8,7 +8,7 @@ import { PushPipe } from '@ngrx/component';
 import { PublicKey } from '@solana/web3.js';
 
 export interface PaymentRequestModalData {
-  requesterPublicKey: PublicKey;
+  requester: PublicKey;
   amount: number;
   memo: string;
 }
@@ -56,10 +56,7 @@ export class PaymentRequestModalComponent implements OnInit {
 
     url.searchParams.append('amount', this.data.amount.toString());
     url.searchParams.append('memo', this.data.memo);
-    url.searchParams.append(
-      'requester',
-      this.data.requesterPublicKey.toBase58()
-    );
+    url.searchParams.append('requester', this.data.requester.toBase58());
 
     this.url = url.toString();
   }

@@ -3,30 +3,16 @@ import { Component, inject } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
 import { MatDialog } from '@angular/material/dialog';
-import {
-  ConnectionStore,
-  Wallet,
-  WalletStore,
-} from '@heavy-duty/wallet-adapter';
+import { ConnectionStore, WalletStore } from '@heavy-duty/wallet-adapter';
 import {
   HdSelectAndConnectWalletDirective,
   HdWalletAdapterDirective,
 } from '@heavy-duty/wallet-adapter-cdk';
-import {
-  HdWalletModalComponent,
-  HdWalletModalTriggerDirective,
-} from '@heavy-duty/wallet-adapter-material';
+import { HdWalletModalTriggerDirective } from '@heavy-duty/wallet-adapter-material';
 import { LetDirective } from '@ngrx/component';
 import { getAccount, getAssociatedTokenAddressSync } from '@solana/spl-token';
-import { WalletName } from '@solana/wallet-adapter-base';
 import { PublicKey } from '@solana/web3.js';
-import {
-  BehaviorSubject,
-  combineLatest,
-  concatMap,
-  firstValueFrom,
-  lastValueFrom,
-} from 'rxjs';
+import { BehaviorSubject, combineLatest, concatMap, lastValueFrom } from 'rxjs';
 import {
   PaymentRequestModalComponent,
   PaymentRequestModalData,
@@ -35,6 +21,7 @@ import { RequestPaymentFormPayload } from './request-payment-form.component';
 import { RequestPaymentModalComponent } from './request-payment-modal.component';
 import { ToUserValuePipe } from './to-user-value.pipe';
 import { TransferModalComponent } from './transfer-modal.component';
+import { WalletService } from './wallet.service';
 
 @Component({
   standalone: true,
@@ -106,6 +93,7 @@ export class BalancePageComponent {
   private readonly _connectionStore = inject(ConnectionStore);
   private readonly _matDialog = inject(MatDialog);
   private readonly _reload = new BehaviorSubject(null);
+  private readonly _walletService = inject(WalletService);
 
   readonly reload$ = this._reload.asObservable();
   readonly balance$ = combineLatest([
@@ -147,70 +135,30 @@ export class BalancePageComponent {
   }
 
   async onRequestPayment() {
-    let requesterWalletPubkey = await firstValueFrom(
-      this._walletStore.publicKey$
+    const requester = await this._walletService.getOrConnectWallet();
+    const requestPaymentPayload = await lastValueFrom(
+      this._matDialog
+        .open<RequestPaymentModalComponent, {}, RequestPaymentFormPayload>(
+          RequestPaymentModalComponent
+        )
+        .afterClosed()
     );
 
-    if (!requesterWalletPubkey) {
-      const wallets = await firstValueFrom(this._walletStore.wallets$);
-      const walletName = await lastValueFrom(
+    if (requestPaymentPayload) {
+      await lastValueFrom(
         this._matDialog
-          .open<HdWalletModalComponent, { wallets: Wallet[] }, WalletName>(
-            HdWalletModalComponent,
+          .open<PaymentRequestModalComponent, PaymentRequestModalData>(
+            PaymentRequestModalComponent,
             {
-              panelClass: ['wallet-modal'],
-              maxWidth: '380px',
-              maxHeight: '90vh',
               data: {
-                wallets,
+                amount: requestPaymentPayload.amount,
+                memo: requestPaymentPayload.memo,
+                requester: requester,
               },
             }
           )
           .afterClosed()
       );
-
-      if (!walletName) {
-        return;
-      }
-
-      this._walletStore.selectWallet(walletName);
-      await firstValueFrom(this._walletStore.connect());
-
-      requesterWalletPubkey = await firstValueFrom(
-        this._walletStore.publicKey$
-      );
-
-      if (!requesterWalletPubkey) {
-        throw new Error('Wallet not connected');
-      }
     }
-
-    const requestPaymentPayload = await lastValueFrom(
-      this._matDialog
-        .open<RequestPaymentModalComponent, {}, RequestPaymentFormPayload>(
-          RequestPaymentModalComponent,
-          {}
-        )
-        .afterClosed()
-    );
-
-    if (!requestPaymentPayload) {
-      return;
-    }
-
-    await lastValueFrom(
-      this._matDialog
-        .open<PaymentRequestModalComponent, PaymentRequestModalData>(
-          PaymentRequestModalComponent,
-          {
-            data: {
-              amount: requestPaymentPayload.amount,
-              memo: requestPaymentPayload.memo,
-              requesterPublicKey: requesterWalletPubkey,
-            },
-          }
-        )
-        .afterClosed()
-    );
   }
 }
