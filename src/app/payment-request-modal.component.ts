@@ -85,7 +85,7 @@ export class PaymentRequestModalComponent implements OnInit {
   solanaPayUrl: string = '';
 
   ngOnInit() {
-    const url = new URL('http://localhost:4200/pay');
+    const url = new URL(`${config.baseUrl}/pay`);
 
     url.searchParams.append('amount', this.data.amount.toString());
     url.searchParams.append('memo', this.data.memo);
