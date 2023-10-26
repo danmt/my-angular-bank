@@ -67,7 +67,7 @@ import { WalletService } from './wallet.service';
             <img src="assets/usdc-logo.png" class="w-12 h-12" />
 
             <p class="text-4xl">
-              {{ amount | hdToUserValue : 6 | number : '2.2-2' }}
+              {{ amount | hdToUserValue | number : '2.2-2' }}
             </p>
           </div>
 
@@ -131,7 +131,7 @@ export class PayPageComponent implements OnInit {
     solanaPayUrl.searchParams.append('spl-token', config.mint);
     solanaPayUrl.searchParams.append(
       'amount',
-      toUserValue(this.amount, 6).toString()
+      toUserValue(this.amount).toString()
     );
     solanaPayUrl.searchParams.append('memo', this.memo);
 

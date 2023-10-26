@@ -6,7 +6,7 @@ import { toUserValue } from './to-user-value';
   standalone: true,
 })
 export class ToUserValuePipe implements PipeTransform {
-  transform(value: number, decimals: number): number {
+  transform(value: number, decimals?: number): number {
     return toUserValue(value, decimals);
   }
 }

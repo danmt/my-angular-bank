@@ -98,7 +98,7 @@ export class PaymentRequestModalComponent implements OnInit {
     solanaPayUrl.searchParams.append('spl-token', config.mint);
     solanaPayUrl.searchParams.append(
       'amount',
-      toUserValue(this.data.amount, 6).toString()
+      toUserValue(this.data.amount).toString()
     );
     solanaPayUrl.searchParams.append('memo', this.data.memo);
 

@@ -60,7 +60,7 @@ import { WalletService } from './wallet.service';
 
           <p class="text-7xl">
             <ng-container *ngIf="balance !== null; else balanceNotFound">
-              {{ balance | hdToUserValue : 6 | number : '2.2-2' }}
+              {{ balance | hdToUserValue | number : '2.2-2' }}
             </ng-container>
             <ng-template #balanceNotFound>-</ng-template>
           </p>

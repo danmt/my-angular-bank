@@ -2,11 +2,10 @@ import { NgIf } from '@angular/common';
 import { Component, EventEmitter, Input, Output, inject } from '@angular/core';
 import { FormsModule, NgForm } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
-import { MatSnackBar } from '@angular/material/snack-bar';
-import { fromUserValue } from './from-user-value';
-
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
+import { MatSnackBar } from '@angular/material/snack-bar';
+import { fromUserValue } from './from-user-value';
 
 export interface RequestPaymentFormModel {
   amount: number | null;
@@ -97,7 +96,7 @@ export class RequestPaymentFormComponent {
       });
     } else {
       this.requestPayment.emit({
-        amount: fromUserValue(this.model.amount, 6),
+        amount: fromUserValue(this.model.amount),
         memo: this.model.memo,
       });
     }
