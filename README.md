@@ -28,8 +28,8 @@ Users can request a payment in USDC by clicking a button that opens a modal that
 
 NOTE: If there's no wallet connect, the user is prompted to connect one.
 
-## QR Codes and Solana Pay (WIP)
+## QR Codes and Solana Pay
 
-Users have a QR that can be read to directly send funds to the connected wallet. Also, when a payment is requested, a QR code is displayed to the user that can be read to send the payment.
+Users have a QR that can be read to directly send funds to the connected wallet. Also, when a payment is requested, a QR code is displayed to the user that can be read to send the payment. The payment page displays the QR for users that don't want to connect their wallets with our site.
 
-NOTE: Both cases use Solana Pay Standard.
+NOTE: This is all powered by the Solana Pay Standard.

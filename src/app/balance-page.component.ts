@@ -4,10 +4,18 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
 import { MatDialog } from '@angular/material/dialog';
 import { ConnectionStore, WalletStore } from '@heavy-duty/wallet-adapter';
+import { HdWalletAdapterDirective } from '@heavy-duty/wallet-adapter-cdk';
 import { LetDirective } from '@ngrx/component';
 import { getAccount, getAssociatedTokenAddressSync } from '@solana/spl-token';
 import { PublicKey } from '@solana/web3.js';
-import { BehaviorSubject, combineLatest, concatMap, lastValueFrom } from 'rxjs';
+import { QRCodeModule } from 'angularx-qrcode';
+import {
+  BehaviorSubject,
+  combineLatest,
+  concatMap,
+  lastValueFrom,
+  map,
+} from 'rxjs';
 import {
   PaymentRequestModalComponent,
   PaymentRequestModalData,
@@ -31,20 +39,25 @@ import { WalletService } from './wallet.service';
     MatButtonModule,
     MatCardModule,
     LetDirective,
+    QRCodeModule,
+    HdWalletAdapterDirective,
     ToUserValuePipe,
   ],
   selector: 'my-bank-balance-page',
   template: `
-    <mat-card class="mx-auto my-8 px-4 py-8 w-full max-w-[500px]">
-      <header class="mb-4">
-        <h2 class="text-3xl text-center mb-4">Balance</h2>
-      </header>
+    <div class="flex gap-4 justify-center">
+      <mat-card class="px-4 py-8 w-[500px] flex flex-col">
+        <header class="mb-4">
+          <h2 class="text-3xl text-center">Balance</h2>
+        </header>
 
-      <div *ngrxLet="balance$; let balance">
-        <div class="flex justify-center items-center gap-2 mb-4">
-          <img src="assets/usdc-logo.png" class="w-12 h-12" />
+        <div
+          *ngrxLet="balance$; let balance"
+          class="grow flex justify-center items-center gap-2 mb-4"
+        >
+          <img src="assets/usdc-logo.png" class="w-24 h-24" />
 
-          <p class="text-4xl">
+          <p class="text-7xl">
             <ng-container *ngIf="balance !== null; else balanceNotFound">
               {{ balance | hdToUserValue : 6 | number : '2.2-2' }}
             </ng-container>
@@ -52,7 +65,7 @@ import { WalletService } from './wallet.service';
           </p>
         </div>
 
-        <div class="flex justify-center gap-2">
+        <footer class="flex justify-center gap-2">
           <button (click)="onTransfer()" mat-raised-button color="primary">
             Transfer
           </button>
@@ -64,9 +77,38 @@ import { WalletService } from './wallet.service';
           >
             Request Payment
           </button>
+        </footer>
+      </mat-card>
+
+      <mat-card class="px-4 py-8 w-[400px]">
+        <header class="mb-4">
+          <h2 class="text-3xl text-center">Deposit using Solana Pay</h2>
+        </header>
+
+        <div
+          *ngrxLet="solanaPayDepositUrl$; let solanaPayDepositUrl"
+          class="flex justify-center"
+        >
+          <qrcode
+            *ngIf="solanaPayDepositUrl !== null; else walletNotConnected"
+            [qrdata]="solanaPayDepositUrl"
+            [width]="256"
+            [margin]="0"
+            [errorCorrectionLevel]="'M'"
+          ></qrcode>
+
+          <ng-template #walletNotConnected>
+            <div
+              class="w-[256px] h-[256px] bg-black bg-opacity-10 p-4 flex justify-center items-center"
+            >
+              <p class="text-center italic text-sm">
+                Connect wallet to view QR Code
+              </p>
+            </div>
+          </ng-template>
         </div>
-      </div>
-    </mat-card>
+      </mat-card>
+    </div>
   `,
   styles: [],
 })
@@ -102,6 +144,22 @@ export class BalancePageComponent {
       }
 
       return Number(associatedTokenAccount.amount);
+    })
+  );
+  readonly solanaPayDepositUrl$ = this._walletStore.publicKey$.pipe(
+    map((publicKey) => {
+      if (!publicKey) {
+        return null;
+      }
+
+      const url = new URL(`solana:${publicKey.toBase58()}`);
+
+      url.searchParams.append(
+        'spl-token',
+        'EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v'
+      );
+
+      return url.toString();
     })
   );
 
