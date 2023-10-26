@@ -4,11 +4,6 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
 import { MatDialog } from '@angular/material/dialog';
 import { ConnectionStore, WalletStore } from '@heavy-duty/wallet-adapter';
-import {
-  HdSelectAndConnectWalletDirective,
-  HdWalletAdapterDirective,
-} from '@heavy-duty/wallet-adapter-cdk';
-import { HdWalletModalTriggerDirective } from '@heavy-duty/wallet-adapter-material';
 import { LetDirective } from '@ngrx/component';
 import { getAccount, getAssociatedTokenAddressSync } from '@solana/spl-token';
 import { PublicKey } from '@solana/web3.js';
@@ -17,9 +12,14 @@ import {
   PaymentRequestModalComponent,
   PaymentRequestModalData,
 } from './payment-request-modal.component';
+import {
+  ProcessingTransferModalComponent,
+  ProcessingTransferModalData,
+} from './processing-transfer-modal.component';
 import { RequestPaymentFormPayload } from './request-payment-form.component';
 import { RequestPaymentModalComponent } from './request-payment-modal.component';
 import { ToUserValuePipe } from './to-user-value.pipe';
+import { TransferFormPayload } from './transfer-form.component';
 import { TransferModalComponent } from './transfer-modal.component';
 import { WalletService } from './wallet.service';
 
@@ -31,9 +31,6 @@ import { WalletService } from './wallet.service';
     MatButtonModule,
     MatCardModule,
     LetDirective,
-    HdWalletModalTriggerDirective,
-    HdWalletAdapterDirective,
-    HdSelectAndConnectWalletDirective,
     ToUserValuePipe,
   ],
   selector: 'my-bank-balance-page',
@@ -55,23 +52,8 @@ import { WalletService } from './wallet.service';
           </p>
         </div>
 
-        <div
-          *hdWalletAdapter="let publicKey = publicKey; let wallets = wallets"
-          class="flex justify-center gap-2"
-        >
-          <button
-            (click)="
-              publicKey ? onTransfer() : hdWalletModalTrigger.open(wallets)
-            "
-            mat-raised-button
-            color="primary"
-            hdSelectAndConnectWallet
-            #hdSelectAndConnectWallet="hdSelectAndConnectWallet"
-            hdWalletModalTrigger
-            #hdWalletModalTrigger="hdWalletModalTrigger"
-            (hdSelectWallet)="hdSelectAndConnectWallet.run($event)"
-            (hdWalletConnected)="onTransfer()"
-          >
+        <div class="flex justify-center gap-2">
+          <button (click)="onTransfer()" mat-raised-button color="primary">
             Transfer
           </button>
 
@@ -123,15 +105,34 @@ export class BalancePageComponent {
     })
   );
 
-  onTransfer() {
-    this._matDialog
-      .open(TransferModalComponent, {})
-      .afterClosed()
-      .subscribe((success) => {
-        if (success) {
-          this._reload.next(null);
-        }
-      });
+  async onTransfer() {
+    const sender = await this._walletService.getOrConnectWallet();
+    const transferPayload = await lastValueFrom(
+      this._matDialog
+        .open<TransferModalComponent, {}, TransferFormPayload>(
+          TransferModalComponent
+        )
+        .afterClosed()
+    );
+
+    if (transferPayload) {
+      await lastValueFrom(
+        this._matDialog
+          .open<
+            ProcessingTransferModalComponent,
+            ProcessingTransferModalData,
+            string
+          >(ProcessingTransferModalComponent, {
+            data: {
+              sender,
+              receiver: new PublicKey(transferPayload.receiver),
+              amount: transferPayload.amount,
+              memo: transferPayload.memo,
+            },
+          })
+          .afterClosed()
+      );
+    }
   }
 
   async onRequestPayment() {

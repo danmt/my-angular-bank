@@ -7,7 +7,6 @@ import { MatDialog } from '@angular/material/dialog';
 import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { ActivatedRoute } from '@angular/router';
-import { WalletStore } from '@heavy-duty/wallet-adapter';
 import { HdObscureAddressPipe } from '@heavy-duty/wallet-adapter-cdk';
 import { HdWalletMultiButtonComponent } from '@heavy-duty/wallet-adapter-material';
 import { PublicKey } from '@solana/web3.js';
@@ -83,7 +82,6 @@ import { WalletService } from './wallet.service';
 })
 export class PayPageComponent implements OnInit {
   private readonly _activatedRoute = inject(ActivatedRoute);
-  private readonly _walletStore = inject(WalletStore);
   private readonly _matDialog = inject(MatDialog);
   private readonly _walletService = inject(WalletService);
 
@@ -115,27 +113,23 @@ export class PayPageComponent implements OnInit {
       throw new Error('Invalid request payment link.');
     }
 
-    try {
-      const payer = await this._walletService.getOrConnectWallet();
+    const payer = await this._walletService.getOrConnectWallet();
 
-      await lastValueFrom(
-        this._matDialog
-          .open<
-            ProcessingTransferModalComponent,
-            ProcessingTransferModalData,
-            string
-          >(ProcessingTransferModalComponent, {
-            data: {
-              sender: payer,
-              receiver: requester,
-              amount,
-              memo,
-            },
-          })
-          .afterClosed()
-      );
-    } catch (error) {
-      console.error(error);
-    }
+    await lastValueFrom(
+      this._matDialog
+        .open<
+          ProcessingTransferModalComponent,
+          ProcessingTransferModalData,
+          string
+        >(ProcessingTransferModalComponent, {
+          data: {
+            sender: payer,
+            receiver: requester,
+            amount,
+            memo,
+          },
+        })
+        .afterClosed()
+    );
   }
 }
