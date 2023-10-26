@@ -19,6 +19,7 @@ import {
   VersionedTransaction,
 } from '@solana/web3.js';
 import { firstValueFrom } from 'rxjs';
+import { config } from './config';
 import { TransferFormComponent } from './transfer-form.component';
 
 export interface ProcessingTransferModalData {
@@ -27,6 +28,13 @@ export interface ProcessingTransferModalData {
   amount: number;
   memo: string;
 }
+
+export type ProcessingTransferModalStatus =
+  | 'pending'
+  | 'sending'
+  | 'confirming'
+  | 'confirmed'
+  | 'failed';
 
 @Component({
   selector: 'my-bank-processing-transfer-modal',
@@ -120,8 +128,7 @@ export class ProcessingTransferModalComponent implements OnInit {
   readonly data = inject<ProcessingTransferModalData>(MAT_DIALOG_DATA);
 
   isRunning = false;
-  status: 'pending' | 'sending' | 'confirming' | 'confirmed' | 'failed' =
-    'pending';
+  status: ProcessingTransferModalStatus = 'pending';
   transactionSignature: TransactionSignature | null = null;
   error: string | null = null;
 
@@ -132,12 +139,12 @@ export class ProcessingTransferModalComponent implements OnInit {
     try {
       // get atas
       const senderAssociatedTokenPubkey = getAssociatedTokenAddressSync(
-        new PublicKey('EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v'),
+        new PublicKey(config.mint),
         this.data.sender
       );
 
       const receiverAssociatedTokenPubkey = getAssociatedTokenAddressSync(
-        new PublicKey('EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v'),
+        new PublicKey(config.mint),
         this.data.receiver
       );
 
@@ -163,9 +170,7 @@ export class ProcessingTransferModalComponent implements OnInit {
             { pubkey: this.data.sender, isSigner: true, isWritable: true },
           ],
           data: Buffer.from(this.data.memo, 'utf-8'),
-          programId: new PublicKey(
-            'MemoSq4gqABAXKb96qnH8TysNcWxMyWCqXgDLGmfcHr'
-          ),
+          programId: new PublicKey(config.memoProgramId),
         }),
       ];
       const transferTransactionMessage = new TransactionMessage({

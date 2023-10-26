@@ -16,6 +16,7 @@ import {
   lastValueFrom,
   map,
 } from 'rxjs';
+import { config } from './config';
 import {
   PaymentRequestModalComponent,
   PaymentRequestModalData,
@@ -131,7 +132,7 @@ export class BalancePageComponent {
       }
 
       const associatedTokenPubkey = getAssociatedTokenAddressSync(
-        new PublicKey('EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v'),
+        new PublicKey(config.mint),
         publicKey
       );
       const associatedTokenAccount = await getAccount(
@@ -154,10 +155,7 @@ export class BalancePageComponent {
 
       const url = new URL(`solana:${publicKey.toBase58()}`);
 
-      url.searchParams.append(
-        'spl-token',
-        'EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v'
-      );
+      url.searchParams.append('spl-token', config.mint);
 
       return url.toString();
     })

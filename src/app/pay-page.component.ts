@@ -12,6 +12,7 @@ import { HdWalletMultiButtonComponent } from '@heavy-duty/wallet-adapter-materia
 import { PublicKey } from '@solana/web3.js';
 import { QRCodeModule } from 'angularx-qrcode';
 import { lastValueFrom } from 'rxjs';
+import { config } from './config';
 import {
   ProcessingTransferModalComponent,
   ProcessingTransferModalData,
@@ -127,10 +128,7 @@ export class PayPageComponent implements OnInit {
 
     const solanaPayUrl = new URL(`solana:${requester}`);
 
-    solanaPayUrl.searchParams.append(
-      'spl-token',
-      'EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v'
-    );
+    solanaPayUrl.searchParams.append('spl-token', config.mint);
     solanaPayUrl.searchParams.append(
       'amount',
       toUserValue(this.amount, 6).toString()

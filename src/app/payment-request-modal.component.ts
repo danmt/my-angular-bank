@@ -7,6 +7,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { LetDirective } from '@ngrx/component';
 import { PublicKey } from '@solana/web3.js';
 import { QRCodeModule } from 'angularx-qrcode';
+import { config } from './config';
 import { toUserValue } from './to-user-value';
 
 export interface PaymentRequestModalData {
@@ -94,10 +95,7 @@ export class PaymentRequestModalComponent implements OnInit {
 
     const solanaPayUrl = new URL(`solana:${this.data.requester.toBase58()}`);
 
-    solanaPayUrl.searchParams.append(
-      'spl-token',
-      'EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v'
-    );
+    solanaPayUrl.searchParams.append('spl-token', config.mint);
     solanaPayUrl.searchParams.append(
       'amount',
       toUserValue(this.data.amount, 6).toString()

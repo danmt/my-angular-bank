@@ -3,6 +3,7 @@ import { MatCardModule } from '@angular/material/card';
 import { RouterOutlet } from '@angular/router';
 import { ConnectionStore } from '@heavy-duty/wallet-adapter';
 import { HdWalletMultiButtonComponent } from '@heavy-duty/wallet-adapter-material';
+import { config } from './config';
 
 @Component({
   standalone: true,
@@ -27,8 +28,6 @@ export class AppComponent implements OnInit {
   private readonly _connectionStore = inject(ConnectionStore);
 
   ngOnInit() {
-    this._connectionStore.setEndpoint(
-      'https://rpc.helius.xyz/?api-key=063bb60d-5399-4d9f-a95c-29082d0d2dd0'
-    );
+    this._connectionStore.setEndpoint(config.rpcEndpoint);
   }
 }
