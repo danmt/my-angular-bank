@@ -8,7 +8,7 @@ The application integrates with wallets using @heavy-duty/wallet-adapter. It sup
 
 ## Display USDC Balance
 
-Once a wallet is connected, it's USDC balance is shown to the user.
+Once a wallet is connected, it's USDC balance is shown to the user. There's a page dedicated for the user's balance, alongside options available like transfering and requesting a payment.
 
 ## Transfer USDC
 
@@ -22,9 +22,9 @@ NOTE: If there's no wallet connect, the user is prompted to connect one.
 
 Whenever a transaction is sent, a memo can be attached to make it easier to identify the purpose of a transaction. Transfers have a field to enter such information when transfering. For payments, this is automatically filled using the link values.
 
-## Request Payment in USDC (WIP)
+## Request Payment in USDC
 
-Users can request a payment in USDC by clicking a button that opens a modal that prompts for an amount. This generates a link that can be shared to the payer. Opening a payment link automatically opens the transfer modal with the values provided in the link as defaults.
+Users can request a payment in USDC by clicking a button that opens a modal that prompts for an amount. This generates a link that can be shared to the payer. Opening a payment link goes to a page where the user can read the payment details and proceed to approve the payment, firing a transfer transaction.
 
 NOTE: If there's no wallet connect, the user is prompted to connect one.
 
