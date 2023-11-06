@@ -135,16 +135,21 @@ export class BalancePageComponent {
         new PublicKey(config.mint),
         publicKey
       );
-      const associatedTokenAccount = await getAccount(
-        connection,
-        associatedTokenPubkey
-      );
 
-      if (!associatedTokenAccount) {
-        return 0;
+      try {
+        const associatedTokenAccount = await getAccount(
+          connection,
+          associatedTokenPubkey
+        );
+
+        if (!associatedTokenAccount) {
+          return 0;
+        }
+
+        return Number(associatedTokenAccount.amount);
+      } catch (error) {
+        return null;
       }
-
-      return Number(associatedTokenAccount.amount);
     })
   );
   readonly solanaPayDepositUrl$ = this._walletStore.publicKey$.pipe(
