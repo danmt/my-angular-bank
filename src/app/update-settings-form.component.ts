@@ -8,10 +8,12 @@ import { MatSnackBar } from '@angular/material/snack-bar';
 
 export interface UpdateSettingsFormModel {
   rpcEndpoint: string | null;
+  shyftApiKey: string | null;
 }
 
 export interface UpdateSettingsFormPayload {
   rpcEndpoint: string;
+  shyftApiKey: string;
 }
 
 @Component({
@@ -31,6 +33,22 @@ export interface UpdateSettingsFormPayload {
           *ngIf="form.submitted && rpcEndpointControl.errors?.['required']"
         >
           RPC Endpoint is required.
+        </mat-error>
+      </mat-form-field>
+
+      <mat-form-field appearance="fill" class="w-full">
+        <mat-label>Shyft API Key</mat-label>
+        <input
+          matInput
+          name="shyftApiKey"
+          [(ngModel)]="model.shyftApiKey"
+          #shyftApiKeyControl="ngModel"
+          required
+        />
+        <mat-error
+          *ngIf="form.submitted && shyftApiKeyControl.errors?.['required']"
+        >
+          Shyft API Key is required.
         </mat-error>
       </mat-form-field>
 
@@ -60,18 +78,24 @@ export class UpdateSettingsFormComponent {
 
   @Input() model: UpdateSettingsFormModel = {
     rpcEndpoint: null,
+    shyftApiKey: null,
   };
   @Input() disabled = false;
   @Output() updateSettings = new EventEmitter<UpdateSettingsFormPayload>();
 
   onSubmit(form: NgForm) {
-    if (form.invalid || this.model.rpcEndpoint === null) {
+    if (
+      form.invalid ||
+      this.model.rpcEndpoint === null ||
+      this.model.shyftApiKey === null
+    ) {
       this._matSnackBar.open('Invalid data, review form entries.', 'close', {
         duration: 3000,
       });
     } else {
       this.updateSettings.emit({
         rpcEndpoint: this.model.rpcEndpoint,
+        shyftApiKey: this.model.shyftApiKey,
       });
     }
   }

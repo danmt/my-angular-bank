@@ -8,6 +8,7 @@ import { ConnectionStore } from '@heavy-duty/wallet-adapter';
 import { HdWalletMultiButtonComponent } from '@heavy-duty/wallet-adapter-material';
 import { firstValueFrom, lastValueFrom } from 'rxjs';
 import { ConnectionService } from './connection.service';
+import { TransactionApiService } from './transaction-api.service';
 import { UpdateSettingsFormPayload } from './update-settings-form.component';
 import {
   UpdateSettingsModalComponent,
@@ -49,6 +50,7 @@ export class AppComponent implements OnInit {
   private readonly _connectionStore = inject(ConnectionStore);
   private readonly _matDialog = inject(MatDialog);
   private readonly _connectionService = inject(ConnectionService);
+  private readonly _transactionApiService = inject(TransactionApiService);
 
   ngOnInit() {
     this._connectionStore.setEndpoint(this._connectionService.rpcEndpoint$);
@@ -58,18 +60,24 @@ export class AppComponent implements OnInit {
     const rpcEndpoint = await firstValueFrom(
       this._connectionService.rpcEndpoint$
     );
+    const shyftApiKey = await firstValueFrom(
+      this._transactionApiService.shyftApiKey$
+    );
     const updateSettingsPayload = await lastValueFrom(
       this._matDialog
         .open<
           UpdateSettingsModalComponent,
           UpdateSettingsModalData,
           UpdateSettingsFormPayload
-        >(UpdateSettingsModalComponent, { data: { rpcEndpoint } })
+        >(UpdateSettingsModalComponent, { data: { rpcEndpoint, shyftApiKey } })
         .afterClosed()
     );
 
     if (updateSettingsPayload) {
       this._connectionService.setRpcEndpoint(updateSettingsPayload.rpcEndpoint);
+      this._transactionApiService.setShyftApiKey(
+        updateSettingsPayload.shyftApiKey
+      );
     }
   }
 }

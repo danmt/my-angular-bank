@@ -9,6 +9,7 @@ import {
 
 export interface UpdateSettingsModalData {
   rpcEndpoint: string;
+  shyftApiKey: string;
 }
 
 @Component({
@@ -24,7 +25,8 @@ export interface UpdateSettingsModalData {
     <div class="p-4 min-w-[350px]">
       <my-bank-update-settings-form
         [model]="{
-          rpcEndpoint: data.rpcEndpoint
+          rpcEndpoint: data.rpcEndpoint,
+          shyftApiKey: data.shyftApiKey
         }"
         (updateSettings)="onUpdateSettings($event)"
       ></my-bank-update-settings-form>

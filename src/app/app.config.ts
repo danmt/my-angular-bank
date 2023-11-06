@@ -1,3 +1,4 @@
+import { HttpClientModule } from '@angular/common/http';
 import { ApplicationConfig, importProvidersFrom } from '@angular/core';
 import { MatDialogModule } from '@angular/material/dialog';
 import { MatSnackBarModule } from '@angular/material/snack-bar';
@@ -23,6 +24,6 @@ export const appConfig: ApplicationConfig = {
         new GlowWalletAdapter(),
       ],
     }),
-    importProvidersFrom([MatSnackBarModule, MatDialogModule]),
+    importProvidersFrom([MatSnackBarModule, MatDialogModule, HttpClientModule]),
   ],
 };

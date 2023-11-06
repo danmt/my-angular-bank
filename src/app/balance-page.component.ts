@@ -1,11 +1,13 @@
-import { DecimalPipe, NgIf } from '@angular/common';
+import { DatePipe, DecimalPipe, NgClass, NgIf } from '@angular/common';
 import { Component, inject } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
 import { MatDialog } from '@angular/material/dialog';
+import { MatIconModule } from '@angular/material/icon';
+import { MatTableModule } from '@angular/material/table';
 import { ConnectionStore, WalletStore } from '@heavy-duty/wallet-adapter';
 import { HdWalletAdapterDirective } from '@heavy-duty/wallet-adapter-cdk';
-import { LetDirective } from '@ngrx/component';
+import { LetDirective, PushPipe } from '@ngrx/component';
 import { getAccount, getAssociatedTokenAddressSync } from '@solana/spl-token';
 import { PublicKey } from '@solana/web3.js';
 import { QRCodeModule } from 'angularx-qrcode';
@@ -28,6 +30,7 @@ import {
 import { RequestPaymentFormPayload } from './request-payment-form.component';
 import { RequestPaymentModalComponent } from './request-payment-modal.component';
 import { ToUserValuePipe } from './to-user-value.pipe';
+import { TransactionApiService } from './transaction-api.service';
 import { TransferFormPayload } from './transfer-form.component';
 import { TransferModalComponent } from './transfer-modal.component';
 import { WalletService } from './wallet.service';
@@ -36,17 +39,22 @@ import { WalletService } from './wallet.service';
   standalone: true,
   imports: [
     NgIf,
+    NgClass,
     DecimalPipe,
+    DatePipe,
     MatButtonModule,
     MatCardModule,
+    MatIconModule,
+    MatTableModule,
     LetDirective,
+    PushPipe,
     QRCodeModule,
     HdWalletAdapterDirective,
     ToUserValuePipe,
   ],
   selector: 'my-bank-balance-page',
   template: `
-    <div class="flex gap-4 justify-center">
+    <div class="flex gap-4 justify-center mb-4">
       <mat-card class="px-4 py-8 w-[500px] flex flex-col">
         <header class="mb-4">
           <h2 class="text-3xl text-center">Balance</h2>
@@ -110,6 +118,85 @@ import { WalletService } from './wallet.service';
         </div>
       </mat-card>
     </div>
+
+    <div class="flex justify-center">
+      <mat-card class="px-4 py-8 w-[700px] flex flex-col">
+        <header class="mb-4">
+          <h2 class="text-3xl text-center">Transaction History</h2>
+        </header>
+
+        <ng-container *ngrxLet="transactions$; let transactions">
+          <ng-container *ngIf="transactions !== null; else walletNotConnected">
+            <table
+              *ngIf="transactions.length > 0; else emptyTransactions"
+              mat-table
+              [dataSource]="transactions"
+              class="mat-elevation-z8"
+            >
+              <ng-container matColumnDef="timestamp">
+                <th mat-header-cell *matHeaderCellDef>Date</th>
+                <td mat-cell *matCellDef="let element">
+                  {{ element.timestamp | date : 'short' }}
+                </td>
+              </ng-container>
+
+              <ng-container matColumnDef="memo">
+                <th mat-header-cell *matHeaderCellDef>Memo</th>
+                <td mat-cell *matCellDef="let element">
+                  {{ element.memo ?? 'Unknown transaction.' }}
+                </td>
+              </ng-container>
+
+              <ng-container matColumnDef="amount">
+                <th mat-header-cell *matHeaderCellDef>Amount</th>
+                <td
+                  mat-cell
+                  *matCellDef="let element"
+                  [ngClass]="{
+                    'text-green-500':
+                      element.sign !== undefined && element.sign > 0,
+                    'text-red-500':
+                      element.sign !== undefined && element.sign < 0
+                  }"
+                  class="text-lg font-bold"
+                >
+                  <div class="flex items-end">
+                    <p>
+                      {{ element.amount !== undefined ? element.amount : '-' }}
+                    </p>
+                    <mat-icon *ngIf="element.sign > 0">trending_up</mat-icon>
+                    <mat-icon *ngIf="element.sign < 0">trending_down</mat-icon>
+                  </div>
+                </td>
+              </ng-container>
+
+              <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+              <tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
+            </table>
+          </ng-container>
+        </ng-container>
+
+        <ng-template #walletNotConnected>
+          <div
+            class="bg-black bg-opacity-10 p-4 flex justify-center items-center"
+          >
+            <p class="text-center italic text-sm">
+              Connect wallet to view transaction history.
+            </p>
+          </div>
+        </ng-template>
+
+        <ng-template #emptyTransactions>
+          <div
+            class="bg-black bg-opacity-10 p-4 flex justify-center items-center"
+          >
+            <p class="text-center italic text-sm">
+              The connected wallet has no transactions.
+            </p>
+          </div>
+        </ng-template>
+      </mat-card>
+    </div>
   `,
   styles: [],
 })
@@ -119,7 +206,9 @@ export class BalancePageComponent {
   private readonly _matDialog = inject(MatDialog);
   private readonly _reload = new BehaviorSubject(null);
   private readonly _walletService = inject(WalletService);
+  private readonly _transactionApiService = inject(TransactionApiService);
 
+  readonly displayedColumns = ['timestamp', 'memo', 'amount'];
   readonly reload$ = this._reload.asObservable();
   readonly balance$ = combineLatest([
     this.reload$,
@@ -163,6 +252,24 @@ export class BalancePageComponent {
       url.searchParams.append('spl-token', config.mint);
 
       return url.toString();
+    })
+  );
+  readonly transactions$ = combineLatest([
+    this.reload$,
+    this._transactionApiService.shyftApiKey$,
+    this._connectionStore.connection$,
+    this._walletStore.publicKey$,
+  ]).pipe(
+    concatMap(async ([, , connection, publicKey]) => {
+      if (!publicKey || !connection) {
+        return null;
+      }
+
+      try {
+        return await this._transactionApiService.getTransactions(publicKey);
+      } catch (error) {
+        return null;
+      }
     })
   );
 
