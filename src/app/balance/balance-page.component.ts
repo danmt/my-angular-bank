@@ -38,10 +38,16 @@ import { TransactionsStore } from './transactions.store';
   selector: 'my-bank-balance-page',
   template: `
     <div class="flex gap-4 justify-center mb-4">
-      <mat-card class="px-4 py-8 w-[500px] flex flex-col">
+      <mat-card class="px-4 py-8 w-[500px] flex flex-col relative">
         <header class="mb-4">
           <h2 class="text-3xl text-center">Balance</h2>
         </header>
+
+        <div class="absolute top-4 right-4">
+          <button mat-mini-fab color="primary" (click)="onReload()">
+            <mat-icon>refresh</mat-icon>
+          </button>
+        </div>
 
         <div
           *ngrxLet="balance$; let balance"
@@ -211,6 +217,11 @@ export class BalancePageComponent {
     })
   );
   readonly transactions$ = this._transactionsStore.transactions$;
+
+  onReload() {
+    this._balanceStore.reload();
+    this._transactionsStore.reload();
+  }
 
   async onTransfer() {
     try {
