@@ -5,40 +5,22 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatSnackBar } from '@angular/material/snack-bar';
-import { fromUserValue } from './from-user-value';
+import { fromUserValue } from '../utils';
 
-export interface TransferFormModel {
-  receiver: string | null;
+export interface RequestPaymentFormModel {
   amount: number | null;
   memo: string | null;
 }
 
-export interface TransferFormPayload {
-  receiver: string;
+export interface RequestPaymentFormPayload {
   amount: number;
   memo: string;
 }
 
 @Component({
-  selector: 'my-bank-transfer-form',
+  selector: 'my-bank-request-payment-form',
   template: `
     <form #form="ngForm" (ngSubmit)="onSubmit(form)">
-      <mat-form-field appearance="fill" class="w-full">
-        <mat-label>Receiver</mat-label>
-        <input
-          matInput
-          name="receiver"
-          [(ngModel)]="model.receiver"
-          #receiverControl="ngModel"
-          required
-        />
-        <mat-error
-          *ngIf="form.submitted && receiverControl.errors?.['required']"
-        >
-          Receiver is required.
-        </mat-error>
-      </mat-form-field>
-
       <mat-form-field appearance="fill" class="w-full">
         <mat-label>Memo</mat-label>
         <input
@@ -79,7 +61,7 @@ export interface TransferFormPayload {
           mat-raised-button
           color="primary"
         >
-          Send
+          Generate Payment Request
         </button>
       </div>
     </form>
@@ -93,31 +75,28 @@ export interface TransferFormPayload {
     MatButtonModule,
   ],
 })
-export class TransferFormComponent {
+export class RequestPaymentFormComponent {
   private readonly _matSnackBar = inject(MatSnackBar);
 
-  @Input() model: TransferFormModel = {
-    receiver: null,
+  @Input() model: RequestPaymentFormModel = {
     amount: null,
     memo: null,
   };
   @Input() disabled = false;
-  @Output() transfer = new EventEmitter<TransferFormPayload>();
+  @Output() requestPayment = new EventEmitter<RequestPaymentFormPayload>();
 
   onSubmit(form: NgForm) {
     if (
       form.invalid ||
       this.model.amount === null ||
-      this.model.receiver === null ||
       this.model.memo === null
     ) {
       this._matSnackBar.open('Invalid data, review form entries.', 'close', {
         duration: 3000,
       });
     } else {
-      this.transfer.emit({
+      this.requestPayment.emit({
         amount: fromUserValue(this.model.amount),
-        receiver: this.model.receiver,
         memo: this.model.memo,
       });
     }

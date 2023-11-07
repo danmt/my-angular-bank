@@ -1,5 +1,5 @@
 import { Pipe, PipeTransform } from '@angular/core';
-import { toUserValue } from './to-user-value';
+import { toUserValue } from '../utils';
 
 @Pipe({
   name: 'hdToUserValue',

@@ -1,19 +1,13 @@
 import { Component, OnInit, inject } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
-import { MatDialog } from '@angular/material/dialog';
 import { MatIconModule } from '@angular/material/icon';
 import { RouterOutlet } from '@angular/router';
 import { ConnectionStore } from '@heavy-duty/wallet-adapter';
 import { HdWalletMultiButtonComponent } from '@heavy-duty/wallet-adapter-material';
-import { firstValueFrom, lastValueFrom } from 'rxjs';
-import { ConnectionService } from './connection.service';
-import { TransactionApiService } from './transaction-api.service';
-import { UpdateSettingsFormPayload } from './update-settings-form.component';
-import {
-  UpdateSettingsModalComponent,
-  UpdateSettingsModalData,
-} from './update-settings-modal.component';
+import { firstValueFrom } from 'rxjs';
+import { ConnectionService, TransactionApiService } from './core';
+import { UpdateSettingsService } from './settings';
 
 @Component({
   standalone: true,
@@ -48,9 +42,9 @@ import {
 })
 export class AppComponent implements OnInit {
   private readonly _connectionStore = inject(ConnectionStore);
-  private readonly _matDialog = inject(MatDialog);
   private readonly _connectionService = inject(ConnectionService);
   private readonly _transactionApiService = inject(TransactionApiService);
+  private readonly _updateSettingsService = inject(UpdateSettingsService);
 
   ngOnInit() {
     this._connectionStore.setEndpoint(this._connectionService.rpcEndpoint$);
@@ -63,15 +57,11 @@ export class AppComponent implements OnInit {
     const shyftApiKey = await firstValueFrom(
       this._transactionApiService.shyftApiKey$
     );
-    const updateSettingsPayload = await lastValueFrom(
-      this._matDialog
-        .open<
-          UpdateSettingsModalComponent,
-          UpdateSettingsModalData,
-          UpdateSettingsFormPayload
-        >(UpdateSettingsModalComponent, { data: { rpcEndpoint, shyftApiKey } })
-        .afterClosed()
-    );
+    const updateSettingsPayload =
+      await this._updateSettingsService.updateSettings({
+        rpcEndpoint,
+        shyftApiKey,
+      });
 
     if (updateSettingsPayload) {
       this._connectionService.setRpcEndpoint(updateSettingsPayload.rpcEndpoint);

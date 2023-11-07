@@ -3,7 +3,6 @@ import { DecimalPipe, NgIf } from '@angular/common';
 import { Component, OnInit, inject } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
-import { MatDialog } from '@angular/material/dialog';
 import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { ActivatedRoute } from '@angular/router';
@@ -11,15 +10,9 @@ import { HdObscureAddressPipe } from '@heavy-duty/wallet-adapter-cdk';
 import { HdWalletMultiButtonComponent } from '@heavy-duty/wallet-adapter-material';
 import { PublicKey } from '@solana/web3.js';
 import { QRCodeModule } from 'angularx-qrcode';
-import { lastValueFrom } from 'rxjs';
-import { config } from './config';
-import {
-  ProcessingTransferModalComponent,
-  ProcessingTransferModalData,
-} from './processing-transfer-modal.component';
-import { toUserValue } from './to-user-value';
-import { ToUserValuePipe } from './to-user-value.pipe';
-import { WalletService } from './wallet.service';
+import { ToUserValuePipe } from '../shared';
+import { ProcessTransferService } from '../transfer';
+import { config, toUserValue } from '../utils';
 
 @Component({
   standalone: true,
@@ -36,12 +29,12 @@ import { WalletService } from './wallet.service';
     HdObscureAddressPipe,
     ToUserValuePipe,
   ],
-  selector: 'my-bank-pay-page',
+  selector: 'my-bank-payment-page',
   template: `
     <div class="flex gap-4 justify-center">
       <mat-card class="px-4 py-8 w-[500px]">
         <header class="mb-4">
-          <h2 class="text-3xl text-center mb-4">Approve Payment</h2>
+          <h2 class="text-3xl text-center mb-4">Payment Details</h2>
         </header>
 
         <div *ngIf="amount !== null && memo !== null && requester !== null">
@@ -102,15 +95,14 @@ import { WalletService } from './wallet.service';
   `,
   styles: [],
 })
-export class PayPageComponent implements OnInit {
+export class PaymentPageComponent implements OnInit {
   private readonly _activatedRoute = inject(ActivatedRoute);
-  private readonly _matDialog = inject(MatDialog);
-  private readonly _walletService = inject(WalletService);
+  private readonly _processTransferService = inject(ProcessTransferService);
 
-  amount: number | null = null;
-  memo: string | null = null;
-  requester: PublicKey | null = null;
-  solanaPayUrl: string | null = null;
+  amount!: number;
+  memo!: string;
+  requester!: PublicKey;
+  solanaPayUrl!: string;
 
   ngOnInit() {
     const amount = this._activatedRoute.snapshot.queryParamMap.get('amount');
@@ -139,31 +131,14 @@ export class PayPageComponent implements OnInit {
   }
 
   async onApprovePayment() {
-    const amount = this.amount;
-    const memo = this.memo;
-    const requester = this.requester;
-
-    if (amount === null || memo === null || requester === null) {
-      throw new Error('Invalid request payment link.');
+    try {
+      await this._processTransferService.processTransfer({
+        receiver: this.requester,
+        amount: this.amount,
+        memo: this.memo,
+      });
+    } catch (error) {
+      console.error('An error occured while transfering.', error);
     }
-
-    const payer = await this._walletService.getOrConnectWallet();
-
-    await lastValueFrom(
-      this._matDialog
-        .open<
-          ProcessingTransferModalComponent,
-          ProcessingTransferModalData,
-          string
-        >(ProcessingTransferModalComponent, {
-          data: {
-            sender: payer,
-            receiver: requester,
-            amount,
-            memo,
-          },
-        })
-        .afterClosed()
-    );
   }
 }

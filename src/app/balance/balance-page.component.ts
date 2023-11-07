@@ -2,38 +2,21 @@ import { DatePipe, DecimalPipe, NgClass, NgIf } from '@angular/common';
 import { Component, inject } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
-import { MatDialog } from '@angular/material/dialog';
 import { MatIconModule } from '@angular/material/icon';
 import { MatTableModule } from '@angular/material/table';
-import { ConnectionStore, WalletStore } from '@heavy-duty/wallet-adapter';
+import { WalletStore } from '@heavy-duty/wallet-adapter';
 import { HdWalletAdapterDirective } from '@heavy-duty/wallet-adapter-cdk';
 import { LetDirective, PushPipe } from '@ngrx/component';
-import { getAccount, getAssociatedTokenAddressSync } from '@solana/spl-token';
+import { provideComponentStore } from '@ngrx/component-store';
 import { PublicKey } from '@solana/web3.js';
 import { QRCodeModule } from 'angularx-qrcode';
-import {
-  BehaviorSubject,
-  combineLatest,
-  concatMap,
-  lastValueFrom,
-  map,
-} from 'rxjs';
-import { config } from './config';
-import {
-  PaymentRequestModalComponent,
-  PaymentRequestModalData,
-} from './payment-request-modal.component';
-import {
-  ProcessingTransferModalComponent,
-  ProcessingTransferModalData,
-} from './processing-transfer-modal.component';
-import { RequestPaymentFormPayload } from './request-payment-form.component';
-import { RequestPaymentModalComponent } from './request-payment-modal.component';
-import { ToUserValuePipe } from './to-user-value.pipe';
-import { TransactionApiService } from './transaction-api.service';
-import { TransferFormPayload } from './transfer-form.component';
-import { TransferModalComponent } from './transfer-modal.component';
-import { WalletService } from './wallet.service';
+import { map } from 'rxjs';
+import { RequestPaymentService } from '../payment';
+import { ToUserValuePipe } from '../shared';
+import { ProcessTransferService, TransferService } from '../transfer';
+import { config } from '../utils';
+import { BalanceStore } from './balance.store';
+import { TransactionsStore } from './transactions.store';
 
 @Component({
   standalone: true,
@@ -199,48 +182,21 @@ import { WalletService } from './wallet.service';
     </div>
   `,
   styles: [],
+  providers: [
+    provideComponentStore(BalanceStore),
+    provideComponentStore(TransactionsStore),
+  ],
 })
 export class BalancePageComponent {
   private readonly _walletStore = inject(WalletStore);
-  private readonly _connectionStore = inject(ConnectionStore);
-  private readonly _matDialog = inject(MatDialog);
-  private readonly _reload = new BehaviorSubject(null);
-  private readonly _walletService = inject(WalletService);
-  private readonly _transactionApiService = inject(TransactionApiService);
+  private readonly _requestPaymentService = inject(RequestPaymentService);
+  private readonly _processTransferService = inject(ProcessTransferService);
+  private readonly _transferService = inject(TransferService);
+  private readonly _balanceStore = inject(BalanceStore);
+  private readonly _transactionsStore = inject(TransactionsStore);
 
   readonly displayedColumns = ['timestamp', 'memo', 'amount'];
-  readonly reload$ = this._reload.asObservable();
-  readonly balance$ = combineLatest([
-    this.reload$,
-    this._connectionStore.connection$,
-    this._walletStore.publicKey$,
-  ]).pipe(
-    concatMap(async ([, connection, publicKey]) => {
-      if (!publicKey || !connection) {
-        return null;
-      }
-
-      const associatedTokenPubkey = getAssociatedTokenAddressSync(
-        new PublicKey(config.mint),
-        publicKey
-      );
-
-      try {
-        const associatedTokenAccount = await getAccount(
-          connection,
-          associatedTokenPubkey
-        );
-
-        if (!associatedTokenAccount) {
-          return 0;
-        }
-
-        return Number(associatedTokenAccount.amount);
-      } catch (error) {
-        return null;
-      }
-    })
-  );
+  readonly balance$ = this._balanceStore.balance$;
   readonly solanaPayDepositUrl$ = this._walletStore.publicKey$.pipe(
     map((publicKey) => {
       if (!publicKey) {
@@ -254,80 +210,29 @@ export class BalancePageComponent {
       return url.toString();
     })
   );
-  readonly transactions$ = combineLatest([
-    this.reload$,
-    this._transactionApiService.shyftApiKey$,
-    this._connectionStore.connection$,
-    this._walletStore.publicKey$,
-  ]).pipe(
-    concatMap(async ([, , connection, publicKey]) => {
-      if (!publicKey || !connection) {
-        return null;
-      }
-
-      try {
-        return await this._transactionApiService.getTransactions(publicKey);
-      } catch (error) {
-        return null;
-      }
-    })
-  );
+  readonly transactions$ = this._transactionsStore.transactions$;
 
   async onTransfer() {
-    const sender = await this._walletService.getOrConnectWallet();
-    const transferPayload = await lastValueFrom(
-      this._matDialog
-        .open<TransferModalComponent, {}, TransferFormPayload>(
-          TransferModalComponent
-        )
-        .afterClosed()
-    );
+    try {
+      const transferPayload = await this._transferService.transfer();
 
-    if (transferPayload) {
-      await lastValueFrom(
-        this._matDialog
-          .open<
-            ProcessingTransferModalComponent,
-            ProcessingTransferModalData,
-            string
-          >(ProcessingTransferModalComponent, {
-            data: {
-              sender,
-              receiver: new PublicKey(transferPayload.receiver),
-              amount: transferPayload.amount,
-              memo: transferPayload.memo,
-            },
-          })
-          .afterClosed()
-      );
+      if (transferPayload) {
+        await this._processTransferService.processTransfer({
+          receiver: new PublicKey(transferPayload.receiver),
+          amount: transferPayload.amount,
+          memo: transferPayload.memo,
+        });
+      }
+    } catch (error) {
+      console.error('An error occured while transfering.', error);
     }
   }
 
   async onRequestPayment() {
-    const requester = await this._walletService.getOrConnectWallet();
-    const requestPaymentPayload = await lastValueFrom(
-      this._matDialog
-        .open<RequestPaymentModalComponent, {}, RequestPaymentFormPayload>(
-          RequestPaymentModalComponent
-        )
-        .afterClosed()
-    );
-
-    if (requestPaymentPayload) {
-      await lastValueFrom(
-        this._matDialog
-          .open<PaymentRequestModalComponent, PaymentRequestModalData>(
-            PaymentRequestModalComponent,
-            {
-              data: {
-                amount: requestPaymentPayload.amount,
-                memo: requestPaymentPayload.memo,
-                requester: requester,
-              },
-            }
-          )
-          .afterClosed()
-      );
+    try {
+      await this._requestPaymentService.requestPayment();
+    } catch (error) {
+      console.error('An error occured while requesting payment.', error);
     }
   }
 }

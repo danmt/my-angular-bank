@@ -7,8 +7,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { LetDirective } from '@ngrx/component';
 import { PublicKey } from '@solana/web3.js';
 import { QRCodeModule } from 'angularx-qrcode';
-import { config } from './config';
-import { toUserValue } from './to-user-value';
+import { config, toUserValue } from '../utils';
 
 export interface PaymentRequestModalData {
   requester: PublicKey;
@@ -81,11 +80,11 @@ export class PaymentRequestModalComponent implements OnInit {
   );
   readonly data = inject<PaymentRequestModalData>(MAT_DIALOG_DATA);
 
-  url: string = '';
-  solanaPayUrl: string = '';
+  url!: string;
+  solanaPayUrl!: string;
 
   ngOnInit() {
-    const url = new URL(`${config.baseUrl}/pay`);
+    const url = new URL(`${config.baseUrl}/payment`);
 
     url.searchParams.append('amount', this.data.amount.toString());
     url.searchParams.append('memo', this.data.memo);

@@ -3,7 +3,7 @@ import { Injectable, inject } from '@angular/core';
 import { getAssociatedTokenAddressSync } from '@solana/spl-token';
 import { PublicKey } from '@solana/web3.js';
 import { BehaviorSubject, firstValueFrom, lastValueFrom } from 'rxjs';
-import { config } from './config';
+import { config } from '../utils';
 
 export type Transaction = {
   timestamp: Date;

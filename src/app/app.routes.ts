@@ -2,14 +2,14 @@ import { Route } from '@angular/router';
 
 export const appRoutes: Route[] = [
   {
-    path: 'pay',
+    path: 'payment',
     loadComponent: () =>
-      import('./pay-page.component').then((m) => m.PayPageComponent),
+      import('./payment').then((m) => m.PaymentPageComponent),
   },
   {
     path: 'balance',
     loadComponent: () =>
-      import('./balance-page.component').then((m) => m.BalancePageComponent),
+      import('./balance').then((m) => m.BalancePageComponent),
   },
   {
     path: '**',

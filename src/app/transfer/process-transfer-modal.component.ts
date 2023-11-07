@@ -19,17 +19,16 @@ import {
   VersionedTransaction,
 } from '@solana/web3.js';
 import { firstValueFrom } from 'rxjs';
-import { config } from './config';
-import { TransferFormComponent } from './transfer-form.component';
+import { config } from '../utils';
 
-export interface ProcessingTransferModalData {
+export interface ProcessTransferModalData {
   sender: PublicKey;
   receiver: PublicKey;
   amount: number;
   memo: string;
 }
 
-export type ProcessingTransferModalStatus =
+export type ProcessTransferModalStatus =
   | 'pending'
   | 'sending'
   | 'confirming'
@@ -37,7 +36,7 @@ export type ProcessingTransferModalStatus =
   | 'failed';
 
 @Component({
-  selector: 'my-bank-processing-transfer-modal',
+  selector: 'my-bank-process-transfer-modal',
   template: `
     <div>
       <header class="flex gap-4 items-center px-4 pt-4">
@@ -76,7 +75,7 @@ export type ProcessingTransferModalStatus =
           ></mat-progress-spinner>
 
           <p class="text-sm italic text-center">
-            Processing... Do NOT reload the page.
+            Process... Do NOT reload the page.
           </p>
         </div>
 
@@ -113,22 +112,21 @@ export type ProcessingTransferModalStatus =
     MatIconModule,
     MatProgressSpinnerModule,
     PushPipe,
-    TransferFormComponent,
   ],
   hostDirectives: [],
 })
-export class ProcessingTransferModalComponent implements OnInit {
+export class ProcessTransferModalComponent implements OnInit {
   private readonly _matDialogRef = inject(
-    MatDialogRef<ProcessingTransferModalComponent>
+    MatDialogRef<ProcessTransferModalComponent>
   );
   private readonly _walletStore = inject(WalletStore);
   private readonly _connectionStore = inject(ConnectionStore);
   private readonly _matSnackBar = inject(MatSnackBar);
 
-  readonly data = inject<ProcessingTransferModalData>(MAT_DIALOG_DATA);
+  readonly data = inject<ProcessTransferModalData>(MAT_DIALOG_DATA);
 
   isRunning = false;
-  status: ProcessingTransferModalStatus = 'pending';
+  status: ProcessTransferModalStatus = 'pending';
   transactionSignature: TransactionSignature | null = null;
   error: string | null = null;
 

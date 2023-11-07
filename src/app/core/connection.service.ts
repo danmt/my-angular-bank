@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { BehaviorSubject } from 'rxjs';
-import { config } from './config';
+import { config } from '../utils';
 
 @Injectable({ providedIn: 'root' })
 export class ConnectionService {
