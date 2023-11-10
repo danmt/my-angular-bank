@@ -2,8 +2,9 @@ import { HttpClient } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
 import { getAssociatedTokenAddressSync } from '@solana/spl-token';
 import { PublicKey } from '@solana/web3.js';
-import { BehaviorSubject, firstValueFrom, lastValueFrom } from 'rxjs';
+import { firstValueFrom, lastValueFrom } from 'rxjs';
 import { config } from '../utils';
+import { ShyftApiKeyService } from './shyft-api-key.service';
 
 export type Transaction = {
   timestamp: Date;
@@ -22,19 +23,12 @@ export type Transaction = {
 @Injectable({ providedIn: 'root' })
 export class TransactionApiService {
   private readonly _httpClient = inject(HttpClient);
-  private readonly _shyftApiKey = new BehaviorSubject(
-    localStorage.getItem('shyftApiKey') ?? config.shyftApiKey
-  );
-
-  readonly shyftApiKey$ = this._shyftApiKey.asObservable();
-
-  setShyftApiKey(shyftApiKey: string) {
-    this._shyftApiKey.next(shyftApiKey);
-    localStorage.setItem('shyftApiKey', shyftApiKey);
-  }
+  private readonly _shyftApiKeyService = inject(ShyftApiKeyService);
 
   async getTransactions(publicKey: PublicKey): Promise<Transaction[]> {
-    const shyftApiKey = await firstValueFrom(this.shyftApiKey$);
+    const shyftApiKey = await firstValueFrom(
+      this._shyftApiKeyService.shyftApiKey$
+    );
     const associatedTokenPubkey = getAssociatedTokenAddressSync(
       new PublicKey(config.mint),
       publicKey

@@ -5,8 +5,8 @@ import { MatIconModule } from '@angular/material/icon';
 import { RouterOutlet } from '@angular/router';
 import { ConnectionStore } from '@heavy-duty/wallet-adapter';
 import { HdWalletMultiButtonComponent } from '@heavy-duty/wallet-adapter-material';
-import { firstValueFrom } from 'rxjs';
-import { ConnectionService, TransactionApiService } from './core';
+import { firstValueFrom, map } from 'rxjs';
+import { ShyftApiKeyService } from './core';
 import { UpdateSettingsService } from './settings';
 
 @Component({
@@ -42,30 +42,34 @@ import { UpdateSettingsService } from './settings';
 })
 export class AppComponent implements OnInit {
   private readonly _connectionStore = inject(ConnectionStore);
-  private readonly _connectionService = inject(ConnectionService);
-  private readonly _transactionApiService = inject(TransactionApiService);
+  private readonly _shyftApiKeyService = inject(ShyftApiKeyService);
   private readonly _updateSettingsService = inject(UpdateSettingsService);
 
   ngOnInit() {
-    this._connectionStore.setEndpoint(this._connectionService.rpcEndpoint$);
+    this._connectionStore.setEndpoint(
+      this._shyftApiKeyService.shyftApiKey$.pipe(
+        map((shyftApiKey) => {
+          const url = new URL('https://rpc.shyft.to');
+
+          url.searchParams.set('api_key', shyftApiKey);
+
+          return url.toString();
+        })
+      )
+    );
   }
 
   async onUpdateSettings() {
-    const rpcEndpoint = await firstValueFrom(
-      this._connectionService.rpcEndpoint$
-    );
     const shyftApiKey = await firstValueFrom(
-      this._transactionApiService.shyftApiKey$
+      this._shyftApiKeyService.shyftApiKey$
     );
     const updateSettingsPayload =
       await this._updateSettingsService.updateSettings({
-        rpcEndpoint,
         shyftApiKey,
       });
 
     if (updateSettingsPayload) {
-      this._connectionService.setRpcEndpoint(updateSettingsPayload.rpcEndpoint);
-      this._transactionApiService.setShyftApiKey(
+      this._shyftApiKeyService.setShyftApiKey(
         updateSettingsPayload.shyftApiKey
       );
     }

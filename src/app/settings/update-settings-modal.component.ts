@@ -8,7 +8,6 @@ import {
 } from './update-settings-form.component';
 
 export interface UpdateSettingsModalData {
-  rpcEndpoint: string;
   shyftApiKey: string;
 }
 
@@ -25,12 +24,18 @@ export interface UpdateSettingsModalData {
     <div class="p-4 min-w-[350px]">
       <my-bank-update-settings-form
         [model]="{
-          rpcEndpoint: data.rpcEndpoint,
           shyftApiKey: data.shyftApiKey
         }"
         (updateSettings)="onUpdateSettings($event)"
       ></my-bank-update-settings-form>
     </div>
+
+    <footer class="flex gap-2 justify-center items-center pb-4">
+      <p>RPC and API Powered by</p>
+      <a href="https://shyft.to" target="_blank">
+        <img src="assets/shyft-logo.png" class="w-8 h-8" />
+      </a>
+    </footer>
   `,
   standalone: true,
   imports: [MatButtonModule, MatIconModule, UpdateSettingsFormComponent],
