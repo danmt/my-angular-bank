@@ -7,7 +7,12 @@ import { MatIconModule } from '@angular/material/icon';
 import { LetDirective } from '@ngrx/component';
 import { PublicKey } from '@solana/web3.js';
 import { QRCodeModule } from 'angularx-qrcode';
-import { config, toUserValue } from '../utils';
+import {
+  config,
+  createPaymentRequestUrl,
+  createSolanaPayUrl,
+  toUserValue,
+} from '../utils';
 
 export interface PaymentRequestModalData {
   requester: PublicKey;
@@ -25,52 +30,51 @@ export interface PaymentRequestModalData {
           <mat-icon> close </mat-icon>
         </button>
       </header>
-    
+
       <div class="p-4 min-w-[350px] max-w-[450px]">
         <p class="mb-4">Share this link for paying the request:</p>
-    
+
         <div
           class="rounded-md px-4 py-2 flex items-center gap-4 bg-black bg-opacity-10 mb-4"
-          >
+        >
           <p class="truncate flex-grow">{{ url }}</p>
-    
+
           <button mat-icon-button [cdkCopyToClipboard]="url">
             <mat-icon>content_copy</mat-icon>
           </button>
         </div>
-    
+
         <p class="mb-4">or</p>
-    
+
         <p class="mb-4">Use Solana Pay</p>
-    
+
         <div class="flex justify-center">
           @if (solanaPayUrl !== null) {
-            <qrcode
-              [qrdata]="solanaPayUrl"
-              [width]="256"
-              [margin]="0"
-              [errorCorrectionLevel]="'M'"
-            ></qrcode>
+          <qrcode
+            [qrdata]="solanaPayUrl"
+            [width]="256"
+            [margin]="0"
+            [errorCorrectionLevel]="'M'"
+          ></qrcode>
           } @else {
-            <div
-              class="w-[256px] h-[256px] bg-black bg-opacity-10 p-4 flex justify-center items-center"
-              >
-              <p class="text-center italic text-sm">URL is not defined</p>
-            </div>
+          <div
+            class="w-[256px] h-[256px] bg-black bg-opacity-10 p-4 flex justify-center items-center"
+          >
+            <p class="text-center italic text-sm">URL is not defined</p>
+          </div>
           }
-    
         </div>
       </div>
     </div>
-    `,
+  `,
   standalone: true,
   imports: [
     MatButtonModule,
     MatIconModule,
     ClipboardModule,
     LetDirective,
-    QRCodeModule
-],
+    QRCodeModule,
+  ],
   hostDirectives: [],
 })
 export class PaymentRequestModalComponent implements OnInit {
@@ -83,24 +87,17 @@ export class PaymentRequestModalComponent implements OnInit {
   solanaPayUrl!: string;
 
   ngOnInit() {
-    const url = new URL(`${config.baseUrl}/payment`);
-
-    url.searchParams.append('amount', this.data.amount.toString());
-    url.searchParams.append('memo', this.data.memo);
-    url.searchParams.append('requester', this.data.requester.toBase58());
-
-    this.url = url.toString();
-
-    const solanaPayUrl = new URL(`solana:${this.data.requester.toBase58()}`);
-
-    solanaPayUrl.searchParams.append('spl-token', config.mint);
-    solanaPayUrl.searchParams.append(
-      'amount',
-      toUserValue(this.data.amount).toString()
-    );
-    solanaPayUrl.searchParams.append('memo', this.data.memo);
-
-    this.solanaPayUrl = solanaPayUrl.toString();
+    this.url = createPaymentRequestUrl({
+      amount: this.data.amount,
+      memo: this.data.memo,
+      requester: this.data.requester.toBase58(),
+    });
+    this.solanaPayUrl = createSolanaPayUrl({
+      receiver: this.data.requester.toBase58(),
+      mint: config.mint,
+      amount: toUserValue(this.data.amount),
+      memo: this.data.memo,
+    });
   }
 
   onClose() {

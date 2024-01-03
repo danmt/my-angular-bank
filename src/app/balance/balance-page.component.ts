@@ -14,7 +14,7 @@ import { map } from 'rxjs';
 import { RequestPaymentService } from '../payment';
 import { ToUserValuePipe } from '../shared';
 import { ProcessTransferService, TransferService } from '../transfer';
-import { config } from '../utils';
+import { config, createSolanaPayUrl } from '../utils';
 import { BalanceStore } from './balance.store';
 import { TransactionsStore } from './transactions.store';
 
@@ -196,11 +196,10 @@ export class BalancePageComponent {
         return null;
       }
 
-      const url = new URL(`solana:${publicKey.toBase58()}`);
-
-      url.searchParams.append('spl-token', config.mint);
-
-      return url.toString();
+      return createSolanaPayUrl({
+        receiver: publicKey.toBase58(),
+        mint: config.mint,
+      });
     })
   );
   readonly transactions$ = this._transactionsStore.transactions$;
