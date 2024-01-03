@@ -1,4 +1,3 @@
-
 import { Component, OnInit, inject } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
@@ -41,78 +40,54 @@ export type ProcessTransferModalStatus =
     <div>
       <header class="flex gap-4 items-center px-4 pt-4">
         <h2 class="grow">
-          @switch (status) {
-            @case ('pending') {
-              Pending Transfer
-            }
-            @case ('sending') {
-              Sending Transfer
-            }
-            @case ('confirming') {
-              Confirming Transfer
-            }
-            @case ('failed') {
-              Failed Transfer
-            }
-            @case ('confirmed') {
-              Successful Transfer
-            }
-          }
+          @switch (status) { @case ('pending') { Pending Transfer } @case
+          ('sending') { Sending Transfer } @case ('confirming') { Confirming
+          Transfer } @case ('failed') { Failed Transfer } @case ('confirmed') {
+          Successful Transfer } }
         </h2>
         <button (click)="onClose()" mat-icon-button [disabled]="isRunning">
           <mat-icon> close </mat-icon>
         </button>
       </header>
-    
+
       <div class="p-4 min-w-[350px] max-w-[450px]">
         @if (status !== 'confirmed' && status !== 'failed') {
-          <div
-            class="flex flex-col gap-4 items-center"
+        <div class="flex flex-col gap-4 items-center">
+          <mat-progress-spinner
+            mode="indeterminate"
+            diameter="64"
+          ></mat-progress-spinner>
+          <p class="text-sm italic text-center">
+            Process... Do NOT reload the page.
+          </p>
+        </div>
+        } @else if (status === 'confirmed') {
+        <div>
+          <p class="mb-2">
+            Feel free to inspect the transaction on the Solana Explorer:
+          </p>
+          <p>
+            <a
+              [href]="'https://explorer.solana.com/tx/' + transactionSignature"
+              target="_blank"
+              class="underline text-blue-400"
             >
-            <mat-progress-spinner
-              mode="indeterminate"
-              diameter="64"
-            ></mat-progress-spinner>
-            <p class="text-sm italic text-center">
-              Process... Do NOT reload the page.
-            </p>
-          </div>
-        }
-    
-        @if (status === 'confirmed') {
-          <div>
-            <p class="mb-2">
-              Feel free to inspect the transaction on the Solana Explorer:
-            </p>
-            <p>
-              <a
-                [href]="'https://explorer.solana.com/tx/' + transactionSignature"
-                target="_blank"
-                class="underline text-blue-400"
-                >
-                [view in explorer]
-              </a>
-            </p>
-          </div>
-        }
-    
-        @if (status === 'failed') {
-          <div>
-            <p class="px-4 py-1 bg-red-200 text-red-600">
-              {{ error }}
-            </p>
-          </div>
+              [view in explorer]
+            </a>
+          </p>
+        </div>
+        } @else if (status === 'failed') {
+        <div>
+          <p class="px-4 py-1 bg-red-200 text-red-600">
+            {{ error }}
+          </p>
+        </div>
         }
       </div>
     </div>
-    `,
+  `,
   standalone: true,
-  imports: [
-    MatButtonModule,
-    MatIconModule,
-    MatProgressSpinnerModule,
-    PushPipe
-],
+  imports: [MatButtonModule, MatIconModule, MatProgressSpinnerModule, PushPipe],
   hostDirectives: [],
 })
 export class ProcessTransferModalComponent implements OnInit {

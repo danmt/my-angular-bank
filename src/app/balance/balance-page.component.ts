@@ -112,7 +112,23 @@ import { TransactionsStore } from './transactions.store';
         </header>
 
         <ng-container *ngrxLet="transactions$; let transactions">
-          @if (transactions !== null) { @if (transactions.length > 0) {
+          @if (transactions === null) {
+          <div
+            class="bg-black bg-opacity-10 p-4 flex justify-center items-center"
+          >
+            <p class="text-center italic text-sm">
+              Connect wallet to view transaction history.
+            </p>
+          </div>
+          } @else if (transactions.length === 0) {
+          <div
+            class="bg-black bg-opacity-10 p-4 flex justify-center items-center"
+          >
+            <p class="text-center italic text-sm">
+              The connected wallet has no transactions.
+            </p>
+          </div>
+          } @else {
           <table mat-table [dataSource]="transactions" class="mat-elevation-z8">
             <ng-container matColumnDef="timestamp">
               <th mat-header-cell *matHeaderCellDef>Date</th>
@@ -144,7 +160,7 @@ import { TransactionsStore } from './transactions.store';
                   </p>
                   @if (element.sign > 0) {
                   <mat-icon>trending_up</mat-icon>
-                  } @if (element.sign < 0) {
+                  } @else if (element.sign < 0) {
                   <mat-icon>trending_down</mat-icon>
                   }
                 </div>
@@ -153,22 +169,6 @@ import { TransactionsStore } from './transactions.store';
             <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
             <tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
           </table>
-          } @else {
-          <div
-            class="bg-black bg-opacity-10 p-4 flex justify-center items-center"
-          >
-            <p class="text-center italic text-sm">
-              The connected wallet has no transactions.
-            </p>
-          </div>
-          } } @else {
-          <div
-            class="bg-black bg-opacity-10 p-4 flex justify-center items-center"
-          >
-            <p class="text-center italic text-sm">
-              Connect wallet to view transaction history.
-            </p>
-          </div>
           }
         </ng-container>
       </mat-card>
