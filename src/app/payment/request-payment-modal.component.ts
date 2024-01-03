@@ -1,4 +1,4 @@
-import { NgIf } from '@angular/common';
+
 import { Component, inject } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
 import { MatDialogRef } from '@angular/material/dialog';
@@ -29,12 +29,11 @@ import {
   `,
   standalone: true,
   imports: [
-    NgIf,
     MatButtonModule,
     MatIconModule,
     PushPipe,
-    RequestPaymentFormComponent,
-  ],
+    RequestPaymentFormComponent
+],
   hostDirectives: [],
 })
 export class RequestPaymentModalComponent {

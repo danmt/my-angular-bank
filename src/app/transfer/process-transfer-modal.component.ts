@@ -1,4 +1,4 @@
-import { NgIf, NgSwitch, NgSwitchCase } from '@angular/common';
+
 import { Component, OnInit, inject } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
@@ -41,78 +41,78 @@ export type ProcessTransferModalStatus =
     <div>
       <header class="flex gap-4 items-center px-4 pt-4">
         <h2 class="grow">
-          <ng-container [ngSwitch]="status">
-            <ng-container *ngSwitchCase="'pending'">
+          @switch (status) {
+            @case ('pending') {
               Pending Transfer
-            </ng-container>
-            <ng-container *ngSwitchCase="'sending'">
+            }
+            @case ('sending') {
               Sending Transfer
-            </ng-container>
-            <ng-container *ngSwitchCase="'confirming'">
+            }
+            @case ('confirming') {
               Confirming Transfer
-            </ng-container>
-            <ng-container *ngSwitchCase="'failed'">
+            }
+            @case ('failed') {
               Failed Transfer
-            </ng-container>
-            <ng-container *ngSwitchCase="'confirmed'">
+            }
+            @case ('confirmed') {
               Successful Transfer
-            </ng-container>
-          </ng-container>
+            }
+          }
         </h2>
         <button (click)="onClose()" mat-icon-button [disabled]="isRunning">
           <mat-icon> close </mat-icon>
         </button>
       </header>
-
+    
       <div class="p-4 min-w-[350px] max-w-[450px]">
-        <div
-          *ngIf="status !== 'confirmed' && status !== 'failed'"
-          class="flex flex-col gap-4 items-center"
-        >
-          <mat-progress-spinner
-            mode="indeterminate"
-            diameter="64"
-          ></mat-progress-spinner>
-
-          <p class="text-sm italic text-center">
-            Process... Do NOT reload the page.
-          </p>
-        </div>
-
-        <div *ngIf="status === 'confirmed'">
-          <p class="mb-2">
-            Feel free to inspect the transaction on the Solana Explorer:
-          </p>
-
-          <p>
-            <a
-              [href]="'https://explorer.solana.com/tx/' + transactionSignature"
-              target="_blank"
-              class="underline text-blue-400"
+        @if (status !== 'confirmed' && status !== 'failed') {
+          <div
+            class="flex flex-col gap-4 items-center"
             >
-              [view in explorer]
-            </a>
-          </p>
-        </div>
-
-        <div *ngIf="status === 'failed'">
-          <p class="px-4 py-1 bg-red-200 text-red-600">
-            {{ error }}
-          </p>
-        </div>
+            <mat-progress-spinner
+              mode="indeterminate"
+              diameter="64"
+            ></mat-progress-spinner>
+            <p class="text-sm italic text-center">
+              Process... Do NOT reload the page.
+            </p>
+          </div>
+        }
+    
+        @if (status === 'confirmed') {
+          <div>
+            <p class="mb-2">
+              Feel free to inspect the transaction on the Solana Explorer:
+            </p>
+            <p>
+              <a
+                [href]="'https://explorer.solana.com/tx/' + transactionSignature"
+                target="_blank"
+                class="underline text-blue-400"
+                >
+                [view in explorer]
+              </a>
+            </p>
+          </div>
+        }
+    
+        @if (status === 'failed') {
+          <div>
+            <p class="px-4 py-1 bg-red-200 text-red-600">
+              {{ error }}
+            </p>
+          </div>
+        }
       </div>
     </div>
-  `,
+    `,
   standalone: true,
   imports: [
-    NgIf,
-    NgSwitch,
-    NgSwitchCase,
     MatButtonModule,
     MatIconModule,
     MatProgressSpinnerModule,
-    PushPipe,
-  ],
+    PushPipe
+],
   hostDirectives: [],
 })
 export class ProcessTransferModalComponent implements OnInit {

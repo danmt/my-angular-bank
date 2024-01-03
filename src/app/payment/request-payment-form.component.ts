@@ -1,4 +1,4 @@
-import { NgIf } from '@angular/common';
+
 import { Component, EventEmitter, Input, Output, inject } from '@angular/core';
 import { FormsModule, NgForm } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
@@ -29,12 +29,14 @@ export interface RequestPaymentFormPayload {
           [(ngModel)]="model.memo"
           #memoControl="ngModel"
           required
-        />
-        <mat-error *ngIf="form.submitted && memoControl.errors?.['required']">
-          Memo is required.
-        </mat-error>
+          />
+        @if (form.submitted && memoControl.errors?.['required']) {
+          <mat-error>
+            Memo is required.
+          </mat-error>
+        }
       </mat-form-field>
-
+    
       <mat-form-field appearance="fill" class="w-full mb-4">
         <mat-label>Amount</mat-label>
         <input
@@ -45,35 +47,38 @@ export interface RequestPaymentFormPayload {
           #amountControl="ngModel"
           required
           min="0.01"
-        />
-        <mat-error *ngIf="form.submitted && amountControl.errors?.['required']">
-          Amount is required.
-        </mat-error>
-        <mat-error *ngIf="form.submitted && amountControl.errors?.['min']">
-          Amount should be one cent or more.
-        </mat-error>
+          />
+        @if (form.submitted && amountControl.errors?.['required']) {
+          <mat-error>
+            Amount is required.
+          </mat-error>
+        }
+        @if (form.submitted && amountControl.errors?.['min']) {
+          <mat-error>
+            Amount should be one cent or more.
+          </mat-error>
+        }
       </mat-form-field>
-
+    
       <div>
         <button
           type="submit"
           [disabled]="disabled"
           mat-raised-button
           color="primary"
-        >
+          >
           Generate Payment Request
         </button>
       </div>
     </form>
-  `,
+    `,
   standalone: true,
   imports: [
-    NgIf,
     FormsModule,
     MatFormFieldModule,
     MatInputModule,
-    MatButtonModule,
-  ],
+    MatButtonModule
+],
 })
 export class RequestPaymentFormComponent {
   private readonly _matSnackBar = inject(MatSnackBar);

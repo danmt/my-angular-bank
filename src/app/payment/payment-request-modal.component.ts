@@ -1,5 +1,5 @@
 import { ClipboardModule } from '@angular/cdk/clipboard';
-import { NgIf } from '@angular/common';
+
 import { Component, OnInit, inject } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
@@ -25,53 +25,52 @@ export interface PaymentRequestModalData {
           <mat-icon> close </mat-icon>
         </button>
       </header>
-
+    
       <div class="p-4 min-w-[350px] max-w-[450px]">
         <p class="mb-4">Share this link for paying the request:</p>
-
+    
         <div
           class="rounded-md px-4 py-2 flex items-center gap-4 bg-black bg-opacity-10 mb-4"
-        >
+          >
           <p class="truncate flex-grow">{{ url }}</p>
-
+    
           <button mat-icon-button [cdkCopyToClipboard]="url">
             <mat-icon>content_copy</mat-icon>
           </button>
         </div>
-
+    
         <p class="mb-4">or</p>
-
+    
         <p class="mb-4">Use Solana Pay</p>
-
+    
         <div class="flex justify-center">
-          <qrcode
-            *ngIf="solanaPayUrl !== null; else solanaPayUrlNotDefined"
-            [qrdata]="solanaPayUrl"
-            [width]="256"
-            [margin]="0"
-            [errorCorrectionLevel]="'M'"
-          ></qrcode>
-
-          <ng-template #solanaPayUrlNotDefined>
+          @if (solanaPayUrl !== null) {
+            <qrcode
+              [qrdata]="solanaPayUrl"
+              [width]="256"
+              [margin]="0"
+              [errorCorrectionLevel]="'M'"
+            ></qrcode>
+          } @else {
             <div
               class="w-[256px] h-[256px] bg-black bg-opacity-10 p-4 flex justify-center items-center"
-            >
+              >
               <p class="text-center italic text-sm">URL is not defined</p>
             </div>
-          </ng-template>
+          }
+    
         </div>
       </div>
     </div>
-  `,
+    `,
   standalone: true,
   imports: [
-    NgIf,
     MatButtonModule,
     MatIconModule,
     ClipboardModule,
     LetDirective,
-    QRCodeModule,
-  ],
+    QRCodeModule
+],
   hostDirectives: [],
 })
 export class PaymentRequestModalComponent implements OnInit {

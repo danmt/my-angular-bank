@@ -1,4 +1,4 @@
-import { DatePipe, DecimalPipe, NgClass, NgIf } from '@angular/common';
+import { DatePipe, DecimalPipe, NgClass } from '@angular/common';
 import { Component, inject } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
@@ -21,7 +21,6 @@ import { TransactionsStore } from './transactions.store';
 @Component({
   standalone: true,
   imports: [
-    NgIf,
     NgClass,
     DecimalPipe,
     DatePipe,
@@ -56,10 +55,9 @@ import { TransactionsStore } from './transactions.store';
           <img src="assets/usdc-logo.png" class="w-24 h-24" />
 
           <p class="text-7xl">
-            <ng-container *ngIf="balance !== null; else balanceNotFound">
-              {{ balance | hdToUserValue | number : '2.2-2' }}
-            </ng-container>
-            <ng-template #balanceNotFound>-</ng-template>
+            @if (balance !== null) {
+            {{ balance | hdToUserValue | number : '2.2-2' }}
+            } @else { - }
           </p>
         </div>
 
@@ -87,23 +85,22 @@ import { TransactionsStore } from './transactions.store';
           *ngrxLet="solanaPayDepositUrl$; let solanaPayDepositUrl"
           class="flex justify-center"
         >
+          @if ( solanaPayDepositUrl !== null) {
           <qrcode
-            *ngIf="solanaPayDepositUrl !== null; else walletNotConnected"
             [qrdata]="solanaPayDepositUrl"
             [width]="256"
             [margin]="0"
             [errorCorrectionLevel]="'M'"
           ></qrcode>
-
-          <ng-template #walletNotConnected>
-            <div
-              class="w-[256px] h-[256px] bg-black bg-opacity-10 p-4 flex justify-center items-center"
-            >
-              <p class="text-center italic text-sm">
-                Connect wallet to view QR Code
-              </p>
-            </div>
-          </ng-template>
+          } @else {
+          <div
+            class="w-[256px] h-[256px] bg-black bg-opacity-10 p-4 flex justify-center items-center"
+          >
+            <p class="text-center italic text-sm">
+              Connect wallet to view QR Code
+            </p>
+          </div>
+          }
         </div>
       </mat-card>
     </div>
@@ -115,67 +112,48 @@ import { TransactionsStore } from './transactions.store';
         </header>
 
         <ng-container *ngrxLet="transactions$; let transactions">
-          <ng-container *ngIf="transactions !== null; else walletNotConnected">
-            <table
-              *ngIf="transactions.length > 0; else emptyTransactions"
-              mat-table
-              [dataSource]="transactions"
-              class="mat-elevation-z8"
-            >
-              <ng-container matColumnDef="timestamp">
-                <th mat-header-cell *matHeaderCellDef>Date</th>
-                <td mat-cell *matCellDef="let element">
-                  {{ element.timestamp | date : 'short' }}
-                </td>
-              </ng-container>
-
-              <ng-container matColumnDef="memo">
-                <th mat-header-cell *matHeaderCellDef>Memo</th>
-                <td mat-cell *matCellDef="let element">
-                  {{ element.memo ?? 'Unknown transaction.' }}
-                </td>
-              </ng-container>
-
-              <ng-container matColumnDef="amount">
-                <th mat-header-cell *matHeaderCellDef>Amount</th>
-                <td
-                  mat-cell
-                  *matCellDef="let element"
-                  [ngClass]="{
-                    'text-green-500':
-                      element.sign !== undefined && element.sign > 0,
-                    'text-red-500':
-                      element.sign !== undefined && element.sign < 0
-                  }"
-                  class="text-lg font-bold"
-                >
-                  <div class="flex items-end">
-                    <p>
-                      {{ element.amount !== undefined ? element.amount : '-' }}
-                    </p>
-                    <mat-icon *ngIf="element.sign > 0">trending_up</mat-icon>
-                    <mat-icon *ngIf="element.sign < 0">trending_down</mat-icon>
-                  </div>
-                </td>
-              </ng-container>
-
-              <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
-              <tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
-            </table>
-          </ng-container>
-        </ng-container>
-
-        <ng-template #walletNotConnected>
-          <div
-            class="bg-black bg-opacity-10 p-4 flex justify-center items-center"
-          >
-            <p class="text-center italic text-sm">
-              Connect wallet to view transaction history.
-            </p>
-          </div>
-        </ng-template>
-
-        <ng-template #emptyTransactions>
+          @if (transactions !== null) { @if (transactions.length > 0) {
+          <table mat-table [dataSource]="transactions" class="mat-elevation-z8">
+            <ng-container matColumnDef="timestamp">
+              <th mat-header-cell *matHeaderCellDef>Date</th>
+              <td mat-cell *matCellDef="let element">
+                {{ element.timestamp | date : 'short' }}
+              </td>
+            </ng-container>
+            <ng-container matColumnDef="memo">
+              <th mat-header-cell *matHeaderCellDef>Memo</th>
+              <td mat-cell *matCellDef="let element">
+                {{ element.memo ?? 'Unknown transaction.' }}
+              </td>
+            </ng-container>
+            <ng-container matColumnDef="amount">
+              <th mat-header-cell *matHeaderCellDef>Amount</th>
+              <td
+                mat-cell
+                *matCellDef="let element"
+                [ngClass]="{
+                  'text-green-500':
+                    element.sign !== undefined && element.sign > 0,
+                  'text-red-500': element.sign !== undefined && element.sign < 0
+                }"
+                class="text-lg font-bold"
+              >
+                <div class="flex items-end">
+                  <p>
+                    {{ element.amount !== undefined ? element.amount : '-' }}
+                  </p>
+                  @if (element.sign > 0) {
+                  <mat-icon>trending_up</mat-icon>
+                  } @if (element.sign < 0) {
+                  <mat-icon>trending_down</mat-icon>
+                  }
+                </div>
+              </td>
+            </ng-container>
+            <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+            <tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
+          </table>
+          } @else {
           <div
             class="bg-black bg-opacity-10 p-4 flex justify-center items-center"
           >
@@ -183,7 +161,16 @@ import { TransactionsStore } from './transactions.store';
               The connected wallet has no transactions.
             </p>
           </div>
-        </ng-template>
+          } } @else {
+          <div
+            class="bg-black bg-opacity-10 p-4 flex justify-center items-center"
+          >
+            <p class="text-center italic text-sm">
+              Connect wallet to view transaction history.
+            </p>
+          </div>
+          }
+        </ng-container>
       </mat-card>
     </div>
   `,
