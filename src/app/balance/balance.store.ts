@@ -1,10 +1,10 @@
-import { Injectable, inject } from '@angular/core';
+import { Injectable, computed, inject, signal } from '@angular/core';
 import { ConnectionStore, WalletStore } from '@heavy-duty/wallet-adapter';
-import { ComponentStore } from '@ngrx/component-store';
 import { getAccount, getAssociatedTokenAddressSync } from '@solana/spl-token';
-import { Connection, PublicKey } from '@solana/web3.js';
-import { BehaviorSubject, concatMap } from 'rxjs';
-import { config } from '../utils';
+import { PublicKey } from '@solana/web3.js';
+import { computedFrom } from 'ngxtension/computed-from';
+import { catchError, from, map, of, pipe, startWith, switchMap } from 'rxjs';
+import { config, stringifyError } from '../utils';
 
 export interface BalanceState {
   balance: number | null;
@@ -13,73 +13,57 @@ export interface BalanceState {
 }
 
 @Injectable()
-export class BalanceStore extends ComponentStore<BalanceState> {
+export class BalanceStore {
   private readonly _walletStore = inject(WalletStore);
   private readonly _connectionStore = inject(ConnectionStore);
-  private readonly _reload = new BehaviorSubject(null);
+  private readonly _reload = signal(Date.now());
 
-  readonly balance$ = this.select((state) => state.balance);
+  readonly state = computedFrom(
+    [
+      this._walletStore.publicKey$,
+      this._connectionStore.connection$,
+      this._reload,
+    ],
+    pipe(
+      switchMap(([publicKey, connection]) => {
+        if (!publicKey || !connection) {
+          return of({ isLoading: false as const, error: null, balance: 0 });
+        }
 
-  private readonly _loadBalance = this.effect<{
-    connection: Connection | null;
-    publicKey: PublicKey | null;
-  }>(
-    concatMap(async ({ connection, publicKey }) => {
-      this.patchState({ isLoading: true, balance: null, error: null });
-
-      if (!publicKey || !connection) {
-        this.patchState({ isLoading: false });
-        return;
-      }
-
-      const associatedTokenPubkey = getAssociatedTokenAddressSync(
-        new PublicKey(config.mint),
-        publicKey
-      );
-
-      try {
-        const associatedTokenAccount = await getAccount(
-          connection,
-          associatedTokenPubkey
+        const associatedTokenPubkey = getAssociatedTokenAddressSync(
+          new PublicKey(config.mint),
+          publicKey,
         );
 
-        if (!associatedTokenAccount) {
-          this.patchState({ balance: 0 });
-        } else {
-          this.patchState({ balance: Number(associatedTokenAccount.amount) });
-        }
-      } catch (error) {
-        if (typeof error === 'string') {
-          this.patchState({ error });
-        } else if (error instanceof Error) {
-          this.patchState({ error: error.message });
-        } else {
-          this.patchState({ error: JSON.stringify(error) });
-        }
-      } finally {
-        this.patchState({ isLoading: false });
-      }
-    })
+        return from(getAccount(connection, associatedTokenPubkey)).pipe(
+          map((associatedTokenAccount) => ({
+            isLoading: false as const,
+            error: null,
+            balance: associatedTokenAccount
+              ? Number(associatedTokenAccount.amount)
+              : 0,
+          })),
+          startWith({
+            isLoading: true as const,
+            balance: null,
+            error: null,
+          }),
+          catchError((error) =>
+            of({
+              error: stringifyError(error),
+              balance: null,
+              isLoading: false as const,
+            }),
+          ),
+        );
+      }),
+    ),
   );
-
-  constructor() {
-    super({
-      balance: null,
-      error: null,
-      isLoading: false,
-    });
-
-    this._loadBalance(
-      this.select(
-        this._walletStore.publicKey$,
-        this._connectionStore.connection$,
-        this._reload.asObservable(),
-        (publicKey, connection) => ({ publicKey, connection })
-      )
-    );
-  }
+  readonly balance = computed(() => this.state().balance);
+  readonly isLoading = computed(() => this.state().isLoading);
+  readonly error = computed(() => this.state().error);
 
   reload() {
-    this._reload.next(null);
+    this._reload.set(Date.now());
   }
 }
