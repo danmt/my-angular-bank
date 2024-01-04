@@ -1,8 +1,7 @@
 import { Component, computed, inject } from '@angular/core';
-import { toSignal } from '@angular/core/rxjs-interop';
 import { MatDialog } from '@angular/material/dialog';
-import { ActivatedRoute } from '@angular/router';
 import { PublicKey } from '@solana/web3.js';
+import { injectQueryParams } from 'ngxtension/inject-query-params';
 import { lastValueFrom } from 'rxjs';
 import { WalletService } from '../core';
 import {
@@ -35,18 +34,15 @@ import { PaymentSectionComponent } from './payment-section.component';
 export class PaymentPageComponent {
   private readonly _matDialog = inject(MatDialog);
   private readonly _walletService = inject(WalletService);
-  private readonly _activatedRoute = inject(ActivatedRoute);
+  private readonly _queryParams = injectQueryParams();
 
-  readonly queryParamMap = toSignal(this._activatedRoute.queryParamMap);
   readonly amount = computed(() => {
-    const amount = this.queryParamMap()?.get('amount') ?? null;
+    const amount = this._queryParams()['amount'] ?? null;
 
     return amount ? Number(amount) : null;
   });
-  readonly memo = computed(() => this.queryParamMap()?.get('memo') ?? null);
-  readonly requester = computed(
-    () => this.queryParamMap()?.get('requester') ?? null,
-  );
+  readonly memo = computed(() => this._queryParams()['memo'] ?? null);
+  readonly requester = computed(() => this._queryParams()['requester'] ?? null);
   readonly solanaPayUrl = computed(() => {
     const amount = this.amount();
     const memo = this.memo();
