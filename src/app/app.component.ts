@@ -38,7 +38,6 @@ import { UpdateSettingsService } from './settings';
       <router-outlet></router-outlet>
     </main>
   `,
-  styles: [],
 })
 export class AppComponent implements OnInit {
   private readonly _connectionStore = inject(ConnectionStore);

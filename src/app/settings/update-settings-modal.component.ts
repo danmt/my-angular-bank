@@ -39,7 +39,6 @@ export interface UpdateSettingsModalData {
   `,
   standalone: true,
   imports: [MatButtonModule, MatIconModule, UpdateSettingsFormComponent],
-  hostDirectives: [],
 })
 export class UpdateSettingsModalComponent {
   private readonly _matDialogRef = inject(

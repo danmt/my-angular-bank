@@ -29,10 +29,6 @@ export interface RequestPaymentFormPayload {
           #memoControl="ngModel"
           required
         />
-        @if (form.submitted && memoControl.errors?.['required']) {
-          <mat-error> Memo is required. </mat-error>
-        }
-
         @if (form.submitted && amountControl.errors) {
           <mat-error>
             @if (amountControl.errors['required']) {
@@ -65,7 +61,7 @@ export interface RequestPaymentFormPayload {
         }
       </mat-form-field>
 
-      <div>
+      <footer>
         <button
           type="submit"
           [disabled]="disabled"
@@ -74,7 +70,7 @@ export interface RequestPaymentFormPayload {
         >
           Generate Payment Request
         </button>
-      </div>
+      </footer>
     </form>
   `,
   standalone: true,

@@ -25,12 +25,11 @@ import {
   `,
   standalone: true,
   imports: [MatButtonModule, MatIconModule, TransferFormComponent],
-  hostDirectives: [],
 })
 export class TransferModalComponent {
   private readonly _matDialogRef = inject(MatDialogRef<TransferModalComponent>);
 
-  async onTransfer(payload: TransferFormPayload) {
+  onTransfer(payload: TransferFormPayload) {
     this._matDialogRef.close(payload);
   }
 

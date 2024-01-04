@@ -80,7 +80,7 @@ export interface TransferFormPayload {
         }
       </mat-form-field>
 
-      <div>
+      <footer>
         <button
           type="submit"
           [disabled]="disabled"
@@ -89,7 +89,7 @@ export interface TransferFormPayload {
         >
           Send
         </button>
-      </div>
+      </footer>
     </form>
   `,
   standalone: true,
