@@ -19,7 +19,7 @@ export class UpdateSettingsService {
           UpdateSettingsModalData,
           UpdateSettingsFormPayload
         >(UpdateSettingsModalComponent, { data: payload })
-        .afterClosed()
+        .afterClosed(),
     );
   }
 }

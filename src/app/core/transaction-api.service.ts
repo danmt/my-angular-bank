@@ -2,7 +2,7 @@ import { HttpClient } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
 import { getAssociatedTokenAddressSync } from '@solana/spl-token';
 import { PublicKey } from '@solana/web3.js';
-import { firstValueFrom, lastValueFrom } from 'rxjs';
+import { lastValueFrom } from 'rxjs';
 import { config } from '../utils';
 import { ShyftApiKeyService } from './shyft-api-key.service';
 
@@ -26,12 +26,10 @@ export class TransactionApiService {
   private readonly _shyftApiKeyService = inject(ShyftApiKeyService);
 
   async getTransactions(publicKey: PublicKey): Promise<Transaction[]> {
-    const shyftApiKey = await firstValueFrom(
-      this._shyftApiKeyService.shyftApiKey$
-    );
+    const shyftApiKey = this._shyftApiKeyService.shyftApiKey();
     const associatedTokenPubkey = getAssociatedTokenAddressSync(
       new PublicKey(config.mint),
-      publicKey
+      publicKey,
     );
 
     const url = new URL('https://api.shyft.to/sol/v1/transaction/history');
@@ -45,7 +43,7 @@ export class TransactionApiService {
         headers: {
           'x-api-key': shyftApiKey,
         },
-      })
+      }),
     );
 
     return result.map((transaction) => {

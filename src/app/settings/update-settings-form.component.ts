@@ -1,4 +1,3 @@
-import { NgIf } from '@angular/common';
 import { Component, EventEmitter, Input, Output, inject } from '@angular/core';
 import { FormsModule, NgForm } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
@@ -27,11 +26,17 @@ export interface UpdateSettingsFormPayload {
           #shyftApiKeyControl="ngModel"
           required
         />
-        <mat-error
-          *ngIf="form.submitted && shyftApiKeyControl.errors?.['required']"
-        >
-          Shyft API Key is required.
-        </mat-error>
+        @if (form.submitted && shyftApiKeyControl.errors?.['required']) {
+          <mat-error> Shyft API Key is required. </mat-error>
+        }
+
+        @if (form.submitted && shyftApiKeyControl.errors) {
+          <mat-error>
+            @if (shyftApiKeyControl.errors['required']) {
+              Shyft API Key is required.
+            }
+          </mat-error>
+        }
       </mat-form-field>
 
       <div>
@@ -47,13 +52,7 @@ export interface UpdateSettingsFormPayload {
     </form>
   `,
   standalone: true,
-  imports: [
-    NgIf,
-    FormsModule,
-    MatFormFieldModule,
-    MatInputModule,
-    MatButtonModule,
-  ],
+  imports: [FormsModule, MatFormFieldModule, MatInputModule, MatButtonModule],
 })
 export class UpdateSettingsFormComponent {
   private readonly _matSnackBar = inject(MatSnackBar);

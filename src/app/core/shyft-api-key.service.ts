@@ -1,17 +1,24 @@
-import { Injectable } from '@angular/core';
-import { BehaviorSubject } from 'rxjs';
+import { Injectable, computed, effect, signal } from '@angular/core';
 import { config } from '../utils';
 
 @Injectable({ providedIn: 'root' })
 export class ShyftApiKeyService {
-  private readonly _shyftApiKey = new BehaviorSubject(
-    localStorage.getItem('shyftApiKey') ?? config.shyftApiKey
+  readonly shyftApiKey = signal(
+    localStorage.getItem('shyftApiKey') ?? config.shyftApiKey,
   );
+  readonly endpoint = computed(() => {
+    const shyftApiKey = this.shyftApiKey();
+    const url = new URL('https://rpc.shyft.to');
 
-  readonly shyftApiKey$ = this._shyftApiKey.asObservable();
+    url.searchParams.set('api_key', shyftApiKey);
+
+    return url.toString();
+  });
+  readonly syncLocalStorage = effect(() => {
+    localStorage.setItem('shyftApiKey', this.shyftApiKey());
+  });
 
   setShyftApiKey(shyftApiKey: string) {
-    this._shyftApiKey.next(shyftApiKey);
-    localStorage.setItem('shyftApiKey', shyftApiKey);
+    this.shyftApiKey.set(shyftApiKey);
   }
 }
