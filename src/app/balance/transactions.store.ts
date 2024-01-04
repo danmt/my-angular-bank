@@ -29,8 +29,8 @@ export class TransactionsStore {
         if (!publicKey || !connection) {
           return of({
             isLoading: false as const,
-            error: null,
             transactions: null,
+            error: null,
           });
         }
 
@@ -39,8 +39,8 @@ export class TransactionsStore {
         ).pipe(
           map((transactions) => ({
             isLoading: false as const,
-            error: null,
             transactions,
+            error: null,
           })),
           startWith({
             isLoading: true as const,
@@ -49,9 +49,9 @@ export class TransactionsStore {
           }),
           catchError((error) =>
             of({
-              error: stringifyError(error),
-              transactions: null,
               isLoading: false as const,
+              transactions: null,
+              error: stringifyError(error),
             }),
           ),
         );

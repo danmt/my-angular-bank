@@ -1,14 +1,9 @@
-import {
-  ChangeDetectionStrategy,
-  Component,
-  computed,
-  inject,
-} from '@angular/core';
-import { toSignal } from '@angular/core/rxjs-interop';
+import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
 import { WalletStore } from '@heavy-duty/wallet-adapter';
 import { PublicKey } from '@solana/web3.js';
-import { lastValueFrom } from 'rxjs';
+import { computedFrom } from 'ngxtension/computed-from';
+import { lastValueFrom, map, pipe } from 'rxjs';
 import { WalletService } from '../core';
 import {
   PaymentRequestModalComponent,
@@ -17,12 +12,16 @@ import {
   RequestPaymentModalComponent,
 } from '../payment';
 import {
-  ProcessTransferModalComponent,
-  ProcessTransferModalData,
+  ProcessTransactionModalComponent,
+  ProcessTransactionModalData,
   TransferFormPayload,
   TransferModalComponent,
 } from '../transfer';
-import { config, createSolanaPayUrl } from '../utils';
+import {
+  config,
+  createSolanaPayUrl,
+  createTransferInstructions,
+} from '../utils';
 import { BalanceSectionComponent } from './balance-section.component';
 import { BalanceStore } from './balance.store';
 import { DepositQrSectionComponent } from './deposit-qr-section.component';
@@ -68,19 +67,21 @@ export class BalancePageComponent {
   private readonly _transactionsStore = inject(TransactionsStore);
 
   readonly balance = this._balanceStore.balance;
-  readonly publicKey = toSignal(this._walletStore.publicKey$);
-  readonly solanaPayDepositUrl = computed(() => {
-    const publicKey = this.publicKey();
+  readonly solanaPayDepositUrl = computedFrom(
+    [this._walletStore.publicKey$],
+    pipe(
+      map(([publicKey]) => {
+        if (publicKey === null) {
+          return null;
+        }
 
-    if (!publicKey) {
-      return null;
-    }
-
-    return createSolanaPayUrl({
-      receiver: publicKey.toBase58(),
-      mint: config.mint,
-    });
-  });
+        return createSolanaPayUrl({
+          receiver: publicKey.toBase58(),
+          mint: config.mint,
+        });
+      }),
+    ),
+  );
   readonly transactions = this._transactionsStore.transactions;
 
   onReload() {
@@ -104,15 +105,17 @@ export class BalancePageComponent {
         await lastValueFrom(
           this._matDialog
             .open<
-              ProcessTransferModalComponent,
-              ProcessTransferModalData,
+              ProcessTransactionModalComponent,
+              ProcessTransactionModalData,
               string
-            >(ProcessTransferModalComponent, {
+            >(ProcessTransactionModalComponent, {
               data: {
-                sender,
-                amount: transferPayload.amount,
-                receiver: new PublicKey(transferPayload.receiver),
-                memo: transferPayload.memo,
+                transactionInstructions: createTransferInstructions(
+                  sender,
+                  new PublicKey(transferPayload.receiver),
+                  transferPayload.amount,
+                  transferPayload.memo,
+                ),
               },
             })
             .afterClosed(),

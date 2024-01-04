@@ -5,10 +5,15 @@ import { injectQueryParams } from 'ngxtension/inject-query-params';
 import { lastValueFrom } from 'rxjs';
 import { WalletService } from '../core';
 import {
-  ProcessTransferModalComponent,
-  ProcessTransferModalData,
+  ProcessTransactionModalComponent,
+  ProcessTransactionModalData,
 } from '../transfer';
-import { config, createSolanaPayUrl, toUserValue } from '../utils';
+import {
+  config,
+  createSolanaPayUrl,
+  createTransferInstructions,
+  toUserValue,
+} from '../utils';
 import { PayQrSectionComponent } from './pay-qr-section.component';
 import { PaymentSectionComponent } from './payment-section.component';
 
@@ -75,15 +80,17 @@ export class PaymentPageComponent {
       await lastValueFrom(
         this._matDialog
           .open<
-            ProcessTransferModalComponent,
-            ProcessTransferModalData,
+            ProcessTransactionModalComponent,
+            ProcessTransactionModalData,
             string
-          >(ProcessTransferModalComponent, {
+          >(ProcessTransactionModalComponent, {
             data: {
-              sender,
-              amount,
-              receiver: new PublicKey(requester),
-              memo,
+              transactionInstructions: createTransferInstructions(
+                sender,
+                new PublicKey(requester),
+                amount,
+                memo,
+              ),
             },
           })
           .afterClosed(),
