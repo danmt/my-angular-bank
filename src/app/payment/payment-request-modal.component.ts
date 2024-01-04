@@ -50,18 +50,18 @@ export interface PaymentRequestModalData {
 
         <div class="flex justify-center">
           @if (solanaPayUrl !== null) {
-          <qrcode
-            [qrdata]="solanaPayUrl"
-            [width]="256"
-            [margin]="0"
-            [errorCorrectionLevel]="'M'"
-          ></qrcode>
+            <qrcode
+              [qrdata]="solanaPayUrl"
+              [width]="256"
+              [margin]="0"
+              [errorCorrectionLevel]="'M'"
+            ></qrcode>
           } @else {
-          <div
-            class="w-[256px] h-[256px] bg-black bg-opacity-10 p-4 flex justify-center items-center"
-          >
-            <p class="text-center italic text-sm">URL is not defined</p>
-          </div>
+            <div
+              class="w-[256px] h-[256px] bg-black bg-opacity-10 p-4 flex justify-center items-center"
+            >
+              <p class="text-center italic text-sm">URL is not defined</p>
+            </div>
           }
         </div>
       </div>
@@ -79,7 +79,7 @@ export interface PaymentRequestModalData {
 })
 export class PaymentRequestModalComponent implements OnInit {
   private readonly _matDialogRef = inject(
-    MatDialogRef<PaymentRequestModalComponent>
+    MatDialogRef<PaymentRequestModalComponent>,
   );
   readonly data = inject<PaymentRequestModalData>(MAT_DIALOG_DATA);
 

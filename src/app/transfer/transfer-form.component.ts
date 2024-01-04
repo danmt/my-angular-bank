@@ -31,8 +31,12 @@ export interface TransferFormPayload {
           #receiverControl="ngModel"
           required
         />
-        @if (form.submitted && receiverControl.errors?.['required']) {
-        <mat-error> Receiver is required. </mat-error>
+        @if (form.submitted && receiverControl.errors) {
+          <mat-error>
+            @if (receiverControl.errors['required']) {
+              Receiver is required.
+            }
+          </mat-error>
         }
       </mat-form-field>
 
@@ -45,8 +49,12 @@ export interface TransferFormPayload {
           #memoControl="ngModel"
           required
         />
-        @if (form.submitted && memoControl.errors?.['required']) {
-        <mat-error> Memo is required. </mat-error>
+        @if (form.submitted && memoControl.errors) {
+          <mat-error>
+            @if (memoControl.errors['required']) {
+              Memo is required.
+            }
+          </mat-error>
         }
       </mat-form-field>
 
@@ -61,10 +69,14 @@ export interface TransferFormPayload {
           required
           min="0.01"
         />
-        @if (form.submitted && amountControl.errors?.['required']) {
-        <mat-error> Amount is required. </mat-error>
-        } @else if (form.submitted && amountControl.errors?.['min']) {
-        <mat-error> Amount should be one cent or more. </mat-error>
+        @if (form.submitted && amountControl.errors) {
+          <mat-error>
+            @if (amountControl.errors['required']) {
+              Amount is required.
+            } @else if (amountControl.errors['required']) {
+              Amount should be one cent or more.
+            }
+          </mat-error>
         }
       </mat-form-field>
 

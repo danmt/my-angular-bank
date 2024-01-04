@@ -30,7 +30,15 @@ export interface RequestPaymentFormPayload {
           required
         />
         @if (form.submitted && memoControl.errors?.['required']) {
-        <mat-error> Memo is required. </mat-error>
+          <mat-error> Memo is required. </mat-error>
+        }
+
+        @if (form.submitted && amountControl.errors) {
+          <mat-error>
+            @if (amountControl.errors['required']) {
+              Memo is required.
+            }
+          </mat-error>
         }
       </mat-form-field>
 
@@ -45,10 +53,15 @@ export interface RequestPaymentFormPayload {
           required
           min="0.01"
         />
-        @if (form.submitted && amountControl.errors?.['required']) {
-        <mat-error> Amount is required. </mat-error>
-        } @else if (form.submitted && amountControl.errors?.['min']) {
-        <mat-error> Amount should be one cent or more. </mat-error>
+
+        @if (form.submitted && amountControl.errors) {
+          <mat-error>
+            @if (amountControl.errors['required']) {
+              Amount is required.
+            } @else if (amountControl.errors['required']) {
+              Amount should be one cent or more.
+            }
+          </mat-error>
         }
       </mat-form-field>
 

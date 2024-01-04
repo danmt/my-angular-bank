@@ -1,9 +1,8 @@
-import { Injectable, inject } from '@angular/core';
+import { Injectable, computed, effect, inject, signal } from '@angular/core';
+import { toSignal } from '@angular/core/rxjs-interop';
 import { ConnectionStore, WalletStore } from '@heavy-duty/wallet-adapter';
-import { ComponentStore } from '@ngrx/component-store';
 import { getAccount, getAssociatedTokenAddressSync } from '@solana/spl-token';
-import { Connection, PublicKey } from '@solana/web3.js';
-import { BehaviorSubject, concatMap } from 'rxjs';
+import { PublicKey } from '@solana/web3.js';
 import { config } from '../utils';
 
 export interface BalanceState {
@@ -13,22 +12,42 @@ export interface BalanceState {
 }
 
 @Injectable()
-export class BalanceStore extends ComponentStore<BalanceState> {
+export class BalanceStore {
   private readonly _walletStore = inject(WalletStore);
   private readonly _connectionStore = inject(ConnectionStore);
-  private readonly _reload = new BehaviorSubject(null);
+  private readonly _reload = signal(Date.now());
 
-  readonly balance$ = this.select((state) => state.balance);
+  // Temporal:
+  private readonly _publicKey = toSignal(this._walletStore.publicKey$, {
+    initialValue: null,
+  });
+  private readonly _connection = toSignal(this._connectionStore.connection$, {
+    initialValue: null,
+  });
 
-  private readonly _loadBalance = this.effect<{
-    connection: Connection | null;
-    publicKey: PublicKey | null;
-  }>(
-    concatMap(async ({ connection, publicKey }) => {
-      this.patchState({ isLoading: true, balance: null, error: null });
+  readonly state = signal<BalanceState>({
+    balance: null,
+    error: null,
+    isLoading: false,
+  });
+  readonly balance = computed(() => this.state().balance);
+  readonly isLoading = computed(() => this.state().isLoading);
+  readonly error = computed(() => this.state().error);
+  readonly loadBalance = effect(
+    async () => {
+      this._reload();
+
+      this.state.set({
+        isLoading: true,
+        balance: null,
+        error: null,
+      });
+
+      const publicKey = this._publicKey();
+      const connection = this._connection();
 
       if (!publicKey || !connection) {
-        this.patchState({ isLoading: false });
+        this.state.update((state) => ({ ...state, isLoading: false }));
         return;
       }
 
@@ -44,42 +63,36 @@ export class BalanceStore extends ComponentStore<BalanceState> {
         );
 
         if (!associatedTokenAccount) {
-          this.patchState({ balance: 0 });
+          this.state.update((state) => ({ ...state, balance: 0 }));
         } else {
-          this.patchState({ balance: Number(associatedTokenAccount.amount) });
+          this.state.update((state) => ({
+            ...state,
+            balance: Number(associatedTokenAccount.amount),
+          }));
         }
-      } catch (error) {
+      } catch (err) {
+        const error = err;
+
         if (typeof error === 'string') {
-          this.patchState({ error });
+          this.state.update((state) => ({ ...state, error }));
         } else if (error instanceof Error) {
-          this.patchState({ error: error.message });
+          this.state.update((state) => ({ ...state, error: error.message }));
         } else {
-          this.patchState({ error: JSON.stringify(error) });
+          this.state.update((state) => ({
+            ...state,
+            error: JSON.stringify(error),
+          }));
         }
       } finally {
-        this.patchState({ isLoading: false });
+        this.state.update((state) => ({ ...state, isLoading: false }));
       }
-    })
+    },
+    {
+      allowSignalWrites: true,
+    }
   );
 
-  constructor() {
-    super({
-      balance: null,
-      error: null,
-      isLoading: false,
-    });
-
-    this._loadBalance(
-      this.select(
-        this._walletStore.publicKey$,
-        this._connectionStore.connection$,
-        this._reload.asObservable(),
-        (publicKey, connection) => ({ publicKey, connection })
-      )
-    );
-  }
-
   reload() {
-    this._reload.next(null);
+    this._reload.set(Date.now());
   }
 }

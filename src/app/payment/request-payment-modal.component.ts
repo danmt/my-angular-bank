@@ -1,4 +1,3 @@
-
 import { Component, inject } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
 import { MatDialogRef } from '@angular/material/dialog';
@@ -32,13 +31,13 @@ import {
     MatButtonModule,
     MatIconModule,
     PushPipe,
-    RequestPaymentFormComponent
-],
+    RequestPaymentFormComponent,
+  ],
   hostDirectives: [],
 })
 export class RequestPaymentModalComponent {
   private readonly _matDialogRef = inject(
-    MatDialogRef<RequestPaymentModalComponent>
+    MatDialogRef<RequestPaymentModalComponent>,
   );
 
   onRequestPayment(payload: RequestPaymentFormPayload) {

@@ -40,10 +40,23 @@ export type ProcessTransferModalStatus =
     <div>
       <header class="flex gap-4 items-center px-4 pt-4">
         <h2 class="grow">
-          @switch (status) { @case ('pending') { Pending Transfer } @case
-          ('sending') { Sending Transfer } @case ('confirming') { Confirming
-          Transfer } @case ('failed') { Failed Transfer } @case ('confirmed') {
-          Successful Transfer } }
+          @switch (status) {
+            @case ('pending') {
+              Pending Transfer
+            }
+            @case ('sending') {
+              Sending Transfer
+            }
+            @case ('confirming') {
+              Confirming Transfer
+            }
+            @case ('failed') {
+              Failed Transfer
+            }
+            @case ('confirmed') {
+              Successful Transfer
+            }
+          }
         </h2>
         <button (click)="onClose()" mat-icon-button [disabled]="isRunning">
           <mat-icon> close </mat-icon>
@@ -52,36 +65,38 @@ export type ProcessTransferModalStatus =
 
       <div class="p-4 min-w-[350px] max-w-[450px]">
         @if (status !== 'confirmed' && status !== 'failed') {
-        <div class="flex flex-col gap-4 items-center">
-          <mat-progress-spinner
-            mode="indeterminate"
-            diameter="64"
-          ></mat-progress-spinner>
-          <p class="text-sm italic text-center">
-            Process... Do NOT reload the page.
-          </p>
-        </div>
+          <div class="flex flex-col gap-4 items-center">
+            <mat-progress-spinner
+              mode="indeterminate"
+              diameter="64"
+            ></mat-progress-spinner>
+            <p class="text-sm italic text-center">
+              Process... Do NOT reload the page.
+            </p>
+          </div>
         } @else if (status === 'confirmed') {
-        <div>
-          <p class="mb-2">
-            Feel free to inspect the transaction on the Solana Explorer:
-          </p>
-          <p>
-            <a
-              [href]="'https://explorer.solana.com/tx/' + transactionSignature"
-              target="_blank"
-              class="underline text-blue-400"
-            >
-              [view in explorer]
-            </a>
-          </p>
-        </div>
+          <div>
+            <p class="mb-2">
+              Feel free to inspect the transaction on the Solana Explorer:
+            </p>
+            <p>
+              <a
+                [href]="
+                  'https://explorer.solana.com/tx/' + transactionSignature
+                "
+                target="_blank"
+                class="underline text-blue-400"
+              >
+                [view in explorer]
+              </a>
+            </p>
+          </div>
         } @else if (status === 'failed') {
-        <div>
-          <p class="px-4 py-1 bg-red-200 text-red-600">
-            {{ error }}
-          </p>
-        </div>
+          <div>
+            <p class="px-4 py-1 bg-red-200 text-red-600">
+              {{ error }}
+            </p>
+          </div>
         }
       </div>
     </div>
@@ -92,7 +107,7 @@ export type ProcessTransferModalStatus =
 })
 export class ProcessTransferModalComponent implements OnInit {
   private readonly _matDialogRef = inject(
-    MatDialogRef<ProcessTransferModalComponent>
+    MatDialogRef<ProcessTransferModalComponent>,
   );
   private readonly _walletStore = inject(WalletStore);
   private readonly _connectionStore = inject(ConnectionStore);
@@ -113,17 +128,17 @@ export class ProcessTransferModalComponent implements OnInit {
       // get atas
       const senderAssociatedTokenPubkey = getAssociatedTokenAddressSync(
         new PublicKey(config.mint),
-        this.data.sender
+        this.data.sender,
       );
 
       const receiverAssociatedTokenPubkey = getAssociatedTokenAddressSync(
         new PublicKey(config.mint),
-        this.data.receiver
+        this.data.receiver,
       );
 
       // create, send and confirm transaction
       const connection = await firstValueFrom(
-        this._connectionStore.connection$
+        this._connectionStore.connection$,
       );
 
       if (!connection) {
@@ -136,7 +151,7 @@ export class ProcessTransferModalComponent implements OnInit {
           senderAssociatedTokenPubkey,
           receiverAssociatedTokenPubkey,
           this.data.sender,
-          this.data.amount
+          this.data.amount,
         ),
         new TransactionInstruction({
           keys: [
@@ -152,13 +167,13 @@ export class ProcessTransferModalComponent implements OnInit {
         instructions: transferTransactionInstruction,
       }).compileToV0Message();
       const transferTransaction = new VersionedTransaction(
-        transferTransactionMessage
+        transferTransactionMessage,
       );
       this.status = 'sending';
       this.transactionSignature = await firstValueFrom(
         this._walletStore.sendTransaction(transferTransaction, connection, {
           maxRetries: 5,
-        })
+        }),
       );
       this.status = 'confirming';
       const transferTransactionConfirmation =
@@ -177,7 +192,7 @@ export class ProcessTransferModalComponent implements OnInit {
       console.log(
         '🎉 Transaction Succesfully Confirmed!',
         '\n',
-        `https://explorer.solana.com/tx/${this.transactionSignature}`
+        `https://explorer.solana.com/tx/${this.transactionSignature}`,
       );
 
       this._matSnackBar.open('Transaction successfully confirmed.', 'close', {

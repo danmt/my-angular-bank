@@ -43,7 +43,7 @@ export interface UpdateSettingsModalData {
 })
 export class UpdateSettingsModalComponent {
   private readonly _matDialogRef = inject(
-    MatDialogRef<UpdateSettingsModalComponent>
+    MatDialogRef<UpdateSettingsModalComponent>,
   );
 
   readonly data = inject<UpdateSettingsModalData>(MAT_DIALOG_DATA);

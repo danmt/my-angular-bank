@@ -1,8 +1,6 @@
-import { Injectable, inject } from '@angular/core';
+import { Injectable, computed, effect, inject, signal } from '@angular/core';
+import { toSignal } from '@angular/core/rxjs-interop';
 import { WalletStore } from '@heavy-duty/wallet-adapter';
-import { ComponentStore } from '@ngrx/component-store';
-import { PublicKey } from '@solana/web3.js';
-import { BehaviorSubject, concatMap } from 'rxjs';
 import { Transaction, TransactionApiService } from '../core';
 
 export interface TransactionsState {
@@ -12,61 +10,67 @@ export interface TransactionsState {
 }
 
 @Injectable()
-export class TransactionsStore extends ComponentStore<TransactionsState> {
+export class TransactionsStore {
   private readonly _walletStore = inject(WalletStore);
-  private readonly _reload = new BehaviorSubject(null);
+  private readonly _reload = signal(Date.now());
   private readonly _transactionApiService = inject(TransactionApiService);
 
-  readonly transactions$ = this.select((state) => state.transactions);
+  private readonly _publicKey = toSignal(this._walletStore.publicKey$, {
+    initialValue: null,
+  }); // Temporal
+  private readonly state = signal<TransactionsState>({
+    transactions: null,
+    error: null,
+    isLoading: false,
+  });
 
-  private readonly _loadTransactions = this.effect<{
-    publicKey: PublicKey | null;
-  }>(
-    concatMap(async ({ publicKey }) => {
-      this.patchState({ isLoading: true, transactions: null, error: null });
+  readonly transactions = computed(() => this.state().transactions);
+  readonly isLoading = computed(() => this.state().isLoading);
+  readonly error = computed(() => this.state().error);
+
+  readonly loadTransactions = effect(
+    async () => {
+      this._reload();
+
+      this.state.set({
+        isLoading: true,
+        transactions: null,
+        error: null,
+      });
+
+      const publicKey = this._publicKey();
 
       if (!publicKey) {
-        this.patchState({ isLoading: false });
+        this.state.update((state) => ({ ...state, isLoading: false }));
         return;
       }
 
       try {
-        const transactions = await this._transactionApiService.getTransactions(
-          publicKey
-        );
+        const transactions =
+          await this._transactionApiService.getTransactions(publicKey);
 
-        this.patchState({ transactions });
-      } catch (error) {
+        this.state.update((state) => ({ ...state, transactions }));
+      } catch (err) {
+        const error = err;
+
         if (typeof error === 'string') {
-          this.patchState({ error });
+          this.state.update((state) => ({ ...state, error }));
         } else if (error instanceof Error) {
-          this.patchState({ error: error.message });
+          this.state.update((state) => ({ ...state, error: error.message }));
         } else {
-          this.patchState({ error: JSON.stringify(error) });
+          this.state.update((state) => ({
+            ...state,
+            error: JSON.stringify(error),
+          }));
         }
       } finally {
-        this.patchState({ isLoading: false });
+        this.state.update((state) => ({ ...state, isLoading: false }));
       }
-    })
+    },
+    { allowSignalWrites: true },
   );
 
-  constructor() {
-    super({
-      transactions: null,
-      error: null,
-      isLoading: false,
-    });
-
-    this._loadTransactions(
-      this.select(
-        this._walletStore.publicKey$,
-        this._reload.asObservable(),
-        (publicKey) => ({ publicKey })
-      )
-    );
-  }
-
   reload() {
-    this._reload.next(null);
+    this._reload.set(Date.now());
   }
 }

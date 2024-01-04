@@ -54,14 +54,14 @@ export class AppComponent implements OnInit {
           url.searchParams.set('api_key', shyftApiKey);
 
           return url.toString();
-        })
-      )
+        }),
+      ),
     );
   }
 
   async onUpdateSettings() {
     const shyftApiKey = await firstValueFrom(
-      this._shyftApiKeyService.shyftApiKey$
+      this._shyftApiKeyService.shyftApiKey$,
     );
     const updateSettingsPayload =
       await this._updateSettingsService.updateSettings({
@@ -70,7 +70,7 @@ export class AppComponent implements OnInit {
 
     if (updateSettingsPayload) {
       this._shyftApiKeyService.setShyftApiKey(
-        updateSettingsPayload.shyftApiKey
+        updateSettingsPayload.shyftApiKey,
       );
     }
   }
