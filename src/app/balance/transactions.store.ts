@@ -1,7 +1,9 @@
-import { Injectable, computed, effect, inject, signal } from '@angular/core';
-import { toSignal } from '@angular/core/rxjs-interop';
-import { WalletStore } from '@heavy-duty/wallet-adapter';
+import { Injectable, computed, inject, signal } from '@angular/core';
+import { ConnectionStore, WalletStore } from '@heavy-duty/wallet-adapter';
+import { computedFrom } from 'ngxtension/computed-from';
+import { catchError, from, map, of, pipe, startWith, switchMap } from 'rxjs';
 import { Transaction, TransactionApiService } from '../core';
+import { stringifyError } from '../utils';
 
 export interface TransactionsState {
   transactions: Transaction[] | null;
@@ -11,64 +13,54 @@ export interface TransactionsState {
 
 @Injectable()
 export class TransactionsStore {
-  private readonly _walletStore = inject(WalletStore);
-  private readonly _reload = signal(Date.now());
   private readonly _transactionApiService = inject(TransactionApiService);
+  private readonly _walletStore = inject(WalletStore);
+  private readonly _connectionStore = inject(ConnectionStore);
+  private readonly _reload = signal(Date.now());
 
-  private readonly _publicKey = toSignal(this._walletStore.publicKey$, {
-    initialValue: null,
-  }); // Temporal
-  private readonly state = signal<TransactionsState>({
-    transactions: null,
-    error: null,
-    isLoading: false,
-  });
+  readonly state = computedFrom(
+    [
+      this._walletStore.publicKey$,
+      this._connectionStore.connection$,
+      this._reload,
+    ],
+    pipe(
+      switchMap(([publicKey, connection]) => {
+        if (!publicKey || !connection) {
+          return of({
+            isLoading: false as const,
+            error: null,
+            transactions: null,
+          });
+        }
 
+        return from(
+          this._transactionApiService.getTransactions(publicKey),
+        ).pipe(
+          map((transactions) => ({
+            isLoading: false as const,
+            error: null,
+            transactions,
+          })),
+          startWith({
+            isLoading: true as const,
+            transactions: null,
+            error: null,
+          }),
+          catchError((error) =>
+            of({
+              error: stringifyError(error),
+              transactions: null,
+              isLoading: false as const,
+            }),
+          ),
+        );
+      }),
+    ),
+  );
   readonly transactions = computed(() => this.state().transactions);
   readonly isLoading = computed(() => this.state().isLoading);
   readonly error = computed(() => this.state().error);
-
-  readonly loadTransactions = effect(
-    async () => {
-      this._reload();
-
-      this.state.set({
-        isLoading: true,
-        transactions: null,
-        error: null,
-      });
-
-      const publicKey = this._publicKey();
-
-      if (!publicKey) {
-        this.state.update((state) => ({ ...state, isLoading: false }));
-        return;
-      }
-
-      try {
-        const transactions =
-          await this._transactionApiService.getTransactions(publicKey);
-
-        this.state.update((state) => ({ ...state, transactions }));
-      } catch (err) {
-        const error = err;
-
-        if (typeof error === 'string') {
-          this.state.update((state) => ({ ...state, error }));
-        } else if (error instanceof Error) {
-          this.state.update((state) => ({ ...state, error: error.message }));
-        } else {
-          this.state.update((state) => ({
-            ...state,
-            error: JSON.stringify(error),
-          }));
-        }
-      } finally {
-        this.state.update((state) => ({ ...state, isLoading: false }));
-      }
-    },
-    { allowSignalWrites: true },
-  );
 
   reload() {
     this._reload.set(Date.now());
