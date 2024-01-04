@@ -32,7 +32,7 @@ import { Transaction } from '../core';
           </p>
         </div>
       } @else {
-        <table mat-table [dataSource]="transactions" class="mat-elevation-z8">
+        <table mat-table [dataSource]="transactions">
           <ng-container matColumnDef="timestamp">
             <th mat-header-cell *matHeaderCellDef>Date</th>
             <td mat-cell *matCellDef="let element">
