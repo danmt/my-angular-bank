@@ -5,7 +5,6 @@ import { MatIconModule } from '@angular/material/icon';
 import { RouterOutlet } from '@angular/router';
 import { ConnectionStore } from '@heavy-duty/wallet-adapter';
 import { HdWalletMultiButtonComponent } from '@heavy-duty/wallet-adapter-material';
-import { firstValueFrom, map } from 'rxjs';
 import { ShyftApiKeyService } from './core';
 import { UpdateSettingsService } from './settings';
 
@@ -45,26 +44,13 @@ export class AppComponent implements OnInit {
   private readonly _updateSettingsService = inject(UpdateSettingsService);
 
   ngOnInit() {
-    this._connectionStore.setEndpoint(
-      this._shyftApiKeyService.shyftApiKey$.pipe(
-        map((shyftApiKey) => {
-          const url = new URL('https://rpc.shyft.to');
-
-          url.searchParams.set('api_key', shyftApiKey);
-
-          return url.toString();
-        }),
-      ),
-    );
+    this._connectionStore.setEndpoint(this._shyftApiKeyService.endpoint());
   }
 
   async onUpdateSettings() {
-    const shyftApiKey = await firstValueFrom(
-      this._shyftApiKeyService.shyftApiKey$,
-    );
     const updateSettingsPayload =
       await this._updateSettingsService.updateSettings({
-        shyftApiKey,
+        shyftApiKey: this._shyftApiKeyService.shyftApiKey(),
       });
 
     if (updateSettingsPayload) {
