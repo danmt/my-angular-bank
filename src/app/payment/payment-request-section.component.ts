@@ -1,5 +1,5 @@
 import { ClipboardModule } from '@angular/cdk/clipboard';
-import { Component, Input } from '@angular/core';
+import { Component, HostBinding, Input } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { QRCodeModule } from 'angularx-qrcode';
@@ -48,6 +48,7 @@ import { QRCodeModule } from 'angularx-qrcode';
   imports: [MatButtonModule, MatIconModule, ClipboardModule, QRCodeModule],
 })
 export class PaymentRequestSectionComponent {
+  @HostBinding() class = 'block';
   @Input({ required: true }) url: string | null = null;
   @Input({ required: true }) solanaPayUrl: string | null = null;
 }
