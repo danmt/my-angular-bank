@@ -53,7 +53,15 @@ export type TransactionSenderSignal = WritableSignal<TransactionState> & {
 
 export function toTransactionSenderSignal(
   signal: WritableSignal<TransactionState>,
-): asserts signal is TransactionSenderSignal {}
+  sendFn: SendFunction,
+): TransactionSenderSignal {
+  Object.defineProperty(signal, 'send', {
+    value: sendFn,
+    writable: false,
+  });
+
+  return signal as TransactionSenderSignal;
+}
 
 export function createTransactionSender(
   sendTransactionFn: (
@@ -67,65 +75,64 @@ export function createTransactionSender(
     signature: null,
     error: null,
   });
-  const sendFn = async (
-    connection: Connection,
-    publicKey: PublicKey,
-    transactionInstructions: TransactionInstruction[],
-  ) => {
-    try {
-      state.set({
-        status: 'sending',
-        signature: null,
-        error: null,
-      });
 
-      const latestBlockhash = await connection.getLatestBlockhash('confirmed');
-      const transactionMessage = new TransactionMessage({
-        payerKey: publicKey,
-        recentBlockhash: latestBlockhash.blockhash,
-        instructions: transactionInstructions,
-      }).compileToV0Message();
-      const transaction = new VersionedTransaction(transactionMessage);
+  return toTransactionSenderSignal(
+    state,
+    async (
+      connection: Connection,
+      publicKey: PublicKey,
+      transactionInstructions: TransactionInstruction[],
+    ) => {
+      try {
+        state.set({
+          status: 'sending',
+          signature: null,
+          error: null,
+        });
 
-      const signature = await firstValueFrom(
-        sendTransactionFn(transaction, connection, {
-          maxRetries: 5,
-        }),
-      );
+        const latestBlockhash =
+          await connection.getLatestBlockhash('confirmed');
+        const transactionMessage = new TransactionMessage({
+          payerKey: publicKey,
+          recentBlockhash: latestBlockhash.blockhash,
+          instructions: transactionInstructions,
+        }).compileToV0Message();
+        const transaction = new VersionedTransaction(transactionMessage);
 
-      state.set({
-        status: 'confirming',
-        signature,
-        error: null,
-      });
+        const signature = await firstValueFrom(
+          sendTransactionFn(transaction, connection, {
+            maxRetries: 5,
+          }),
+        );
 
-      const confirmation = await connection.confirmTransaction({
-        signature,
-        blockhash: latestBlockhash.blockhash,
-        lastValidBlockHeight: latestBlockhash.lastValidBlockHeight,
-      });
+        state.set({
+          status: 'confirming',
+          signature,
+          error: null,
+        });
 
-      if (confirmation.value.err) {
-        throw new Error('Confirmation failed.');
+        const confirmation = await connection.confirmTransaction({
+          signature,
+          blockhash: latestBlockhash.blockhash,
+          lastValidBlockHeight: latestBlockhash.lastValidBlockHeight,
+        });
+
+        if (confirmation.value.err) {
+          throw new Error('Confirmation failed.');
+        }
+
+        state.set({
+          status: 'confirmed',
+          signature,
+          error: null,
+        });
+      } catch (error) {
+        state.set({
+          status: 'failed',
+          signature: null,
+          error: stringifyError(error),
+        });
       }
-
-      state.set({
-        status: 'confirmed',
-        signature,
-        error: null,
-      });
-    } catch (error) {
-      state.set({
-        status: 'failed',
-        signature: null,
-        error: stringifyError(error),
-      });
-    }
-  };
-
-  toTransactionSenderSignal(state);
-
-  state.send = sendFn;
-
-  return state;
+    },
+  );
 }
