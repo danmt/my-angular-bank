@@ -39,15 +39,18 @@ import { PaymentSectionComponent } from './payment-section.component';
 export class PaymentPageComponent {
   private readonly _matDialog = inject(MatDialog);
   private readonly _walletService = inject(WalletService);
-  private readonly _queryParams = injectQueryParams();
 
-  readonly amount = computed(() => {
-    const amount = this._queryParams()['amount'] ?? null;
+  readonly amount = injectQueryParams((queryParams) => {
+    const amount = queryParams['amount'];
 
-    return amount ? Number(amount) : null;
+    if (amount === undefined) {
+      return null;
+    }
+
+    return Number(amount);
   });
-  readonly memo = computed(() => this._queryParams()['memo'] ?? null);
-  readonly requester = computed(() => this._queryParams()['requester'] ?? null);
+  readonly memo = injectQueryParams('memo');
+  readonly requester = injectQueryParams('requester');
   readonly solanaPayUrl = computed(() => {
     const amount = this.amount();
     const memo = this.memo();
