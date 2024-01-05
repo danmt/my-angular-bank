@@ -3,7 +3,7 @@ import { MatDialog } from '@angular/material/dialog';
 import { WalletStore } from '@heavy-duty/wallet-adapter';
 import { PublicKey } from '@solana/web3.js';
 import { computedFrom } from 'ngxtension/computed-from';
-import { lastValueFrom, map, pipe } from 'rxjs';
+import { lastValueFrom, map } from 'rxjs';
 import { WalletService } from '../core';
 import {
   PaymentRequestModalComponent,
@@ -69,18 +69,16 @@ export class BalancePageComponent {
   readonly balance = this._balanceStore.balance;
   readonly solanaPayDepositUrl = computedFrom(
     [this._walletStore.publicKey$],
-    pipe(
-      map(([publicKey]) => {
-        if (publicKey === null) {
-          return null;
-        }
+    map(([publicKey]) => {
+      if (publicKey === null) {
+        return null;
+      }
 
-        return createSolanaPayUrl({
-          receiver: publicKey.toBase58(),
-          mint: config.mint,
-        });
-      }),
-    ),
+      return createSolanaPayUrl({
+        receiver: publicKey.toBase58(),
+        mint: config.mint,
+      });
+    }),
   );
   readonly transactions = this._transactionsStore.transactions;
 
