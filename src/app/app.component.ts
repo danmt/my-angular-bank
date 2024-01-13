@@ -1,12 +1,18 @@
 import { Component, OnInit, inject } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
+import { MatDialog } from '@angular/material/dialog';
 import { MatIconModule } from '@angular/material/icon';
 import { RouterOutlet } from '@angular/router';
 import { ConnectionStore } from '@heavy-duty/wallet-adapter';
 import { HdWalletMultiButtonComponent } from '@heavy-duty/wallet-adapter-material';
+import { lastValueFrom } from 'rxjs';
 import { ShyftApiKeyService } from './core';
-import { UpdateSettingsService } from './settings';
+import {
+  UpdateSettingsFormPayload,
+  UpdateSettingsModalComponent,
+  UpdateSettingsModalData,
+} from './settings';
 
 @Component({
   standalone: true,
@@ -41,17 +47,26 @@ import { UpdateSettingsService } from './settings';
 export class AppComponent implements OnInit {
   private readonly _connectionStore = inject(ConnectionStore);
   private readonly _shyftApiKeyService = inject(ShyftApiKeyService);
-  private readonly _updateSettingsService = inject(UpdateSettingsService);
+  private readonly _matDialog = inject(MatDialog);
 
   ngOnInit() {
     this._connectionStore.setEndpoint(this._shyftApiKeyService.endpoint());
   }
 
   async onUpdateSettings() {
-    const updateSettingsPayload =
-      await this._updateSettingsService.updateSettings({
-        shyftApiKey: this._shyftApiKeyService.shyftApiKey(),
-      });
+    const updateSettingsPayload = await lastValueFrom(
+      this._matDialog
+        .open<
+          UpdateSettingsModalComponent,
+          UpdateSettingsModalData,
+          UpdateSettingsFormPayload
+        >(UpdateSettingsModalComponent, {
+          data: {
+            shyftApiKey: this._shyftApiKeyService.shyftApiKey(),
+          },
+        })
+        .afterClosed(),
+    );
 
     if (updateSettingsPayload) {
       this._shyftApiKeyService.setShyftApiKey(

@@ -26,10 +26,6 @@ export interface UpdateSettingsFormPayload {
           #shyftApiKeyControl="ngModel"
           required
         />
-        @if (form.submitted && shyftApiKeyControl.errors?.['required']) {
-          <mat-error> Shyft API Key is required. </mat-error>
-        }
-
         @if (form.submitted && shyftApiKeyControl.errors) {
           <mat-error>
             @if (shyftApiKeyControl.errors['required']) {
