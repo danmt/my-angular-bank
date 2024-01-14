@@ -3,7 +3,8 @@ import { Component, HostBinding, Input } from '@angular/core';
 import { MatCardModule } from '@angular/material/card';
 import { MatIconModule } from '@angular/material/icon';
 import { MatTableModule } from '@angular/material/table';
-import { Transaction } from '../core';
+import { PublicKey } from '@solana/web3.js';
+import { Transaction } from '../utils';
 
 @Component({
   standalone: true,
@@ -52,8 +53,13 @@ import { Transaction } from '../core';
               *matCellDef="let element"
               [ngClass]="{
                 'text-green-500':
-                  element.sign !== undefined && element.sign > 0,
-                'text-red-500': element.sign !== undefined && element.sign < 0
+                  element.type === 'transfer' &&
+                  publicKey !== null &&
+                  element.sender !== publicKey.toBase58(),
+                'text-red-500':
+                  element.type === 'transfer' &&
+                  publicKey !== null &&
+                  element.sender === publicKey.toBase58()
               }"
               class="text-lg font-bold"
             >
@@ -79,6 +85,7 @@ import { Transaction } from '../core';
 export class TransactionsSectionComponent {
   @HostBinding() class = 'block';
   @Input({ required: true }) transactions: Transaction[] | null = null;
+  @Input({ required: true }) publicKey: PublicKey | null = null;
 
   readonly displayedColumns = ['timestamp', 'memo', 'amount'];
 }

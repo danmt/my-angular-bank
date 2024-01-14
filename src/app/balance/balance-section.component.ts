@@ -38,7 +38,7 @@ import { ToUserValuePipe } from '../shared';
 
         <p class="text-7xl">
           @if (balance !== null) {
-            {{ balance | hdToUserValue | number: '2.2-2' }}
+            {{ balance | number: '2.2-2' }}
           } @else {
             -
           }

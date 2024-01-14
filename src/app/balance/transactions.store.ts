@@ -1,9 +1,11 @@
 import { Injectable, computed, inject, signal } from '@angular/core';
-import { ConnectionStore, WalletStore } from '@heavy-duty/wallet-adapter';
+import { WalletStore } from '@heavy-duty/wallet-adapter';
+import { getAssociatedTokenAddressSync } from '@solana/spl-token';
+import { PublicKey } from '@solana/web3.js';
 import { computedFrom } from 'ngxtension/computed-from';
-import { catchError, from, map, of, startWith, switchMap } from 'rxjs';
-import { Transaction, TransactionApiService } from '../core';
-import { stringifyError } from '../utils';
+import { catchError, map, of, startWith, switchMap } from 'rxjs';
+import { ShyftApiService } from '../core';
+import { Transaction, config, stringifyError } from '../utils';
 
 export interface TransactionsState {
   transactions: Transaction[] | null;
@@ -13,19 +15,14 @@ export interface TransactionsState {
 
 @Injectable()
 export class TransactionsStore {
-  private readonly _transactionApiService = inject(TransactionApiService);
+  private readonly _shyftApiService = inject(ShyftApiService);
   private readonly _walletStore = inject(WalletStore);
-  private readonly _connectionStore = inject(ConnectionStore);
   private readonly _reload = signal(Date.now());
 
   readonly state = computedFrom(
-    [
-      this._walletStore.publicKey$,
-      this._connectionStore.connection$,
-      this._reload,
-    ],
-    switchMap(([publicKey, connection]) => {
-      if (!publicKey || !connection) {
+    [this._walletStore.publicKey$, this._reload],
+    switchMap(([publicKey]) => {
+      if (!publicKey) {
         return of({
           isLoading: false as const,
           transactions: null,
@@ -33,7 +30,12 @@ export class TransactionsStore {
         });
       }
 
-      return from(this._transactionApiService.getTransactions(publicKey)).pipe(
+      const associatedTokenPubkey = getAssociatedTokenAddressSync(
+        new PublicKey(config.mint),
+        publicKey,
+      );
+
+      return this._shyftApiService.getTransactions(associatedTokenPubkey).pipe(
         map((transactions) => ({
           isLoading: false as const,
           transactions,

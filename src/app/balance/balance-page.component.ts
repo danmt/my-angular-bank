@@ -1,4 +1,5 @@
 import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
+import { toSignal } from '@angular/core/rxjs-interop';
 import { MatDialog } from '@angular/material/dialog';
 import { WalletStore } from '@heavy-duty/wallet-adapter';
 import { PublicKey } from '@solana/web3.js';
@@ -53,6 +54,7 @@ import { TransactionsStore } from './transactions.store';
     <div class="flex justify-center">
       <my-bank-transactions-section
         [transactions]="transactions()"
+        [publicKey]="publicKey()"
       ></my-bank-transactions-section>
     </div>
   `,
@@ -80,6 +82,9 @@ export class BalancePageComponent {
       });
     }),
   );
+  readonly publicKey = toSignal(this._walletStore.publicKey$, {
+    initialValue: null,
+  });
   readonly transactions = this._transactionsStore.transactions;
 
   onReload() {

@@ -7,7 +7,7 @@ import { RouterOutlet } from '@angular/router';
 import { ConnectionStore } from '@heavy-duty/wallet-adapter';
 import { HdWalletMultiButtonComponent } from '@heavy-duty/wallet-adapter-material';
 import { lastValueFrom } from 'rxjs';
-import { ShyftApiKeyService } from './core';
+import { ShyftApiService } from './core';
 import {
   UpdateSettingsFormPayload,
   UpdateSettingsModalComponent,
@@ -46,7 +46,7 @@ import {
 })
 export class AppComponent implements OnInit {
   private readonly _connectionStore = inject(ConnectionStore);
-  private readonly _shyftApiKeyService = inject(ShyftApiKeyService);
+  private readonly _shyftApiKeyService = inject(ShyftApiService);
   private readonly _matDialog = inject(MatDialog);
 
   ngOnInit() {
