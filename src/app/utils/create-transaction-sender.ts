@@ -45,7 +45,7 @@ export type SendFunction = (
   connection: Connection,
   publicKey: PublicKey,
   transactionInstructions: TransactionInstruction[],
-) => Promise<void>;
+) => Promise<TransactionSignature>;
 
 export type TransactionSenderSignal = WritableSignal<TransactionState> & {
   send: SendFunction;
@@ -126,12 +126,15 @@ export function createTransactionSender(
           signature,
           error: null,
         });
+
+        return signature;
       } catch (error) {
         state.set({
           status: 'failed',
           signature: null,
           error: stringifyError(error),
         });
+        throw error;
       }
     },
   );

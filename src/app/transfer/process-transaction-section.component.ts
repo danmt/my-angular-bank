@@ -1,13 +1,22 @@
-import { Component, Input } from '@angular/core';
+import { Component, EventEmitter, Input, Output } from '@angular/core';
+import { MatButtonModule } from '@angular/material/button';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { TransactionStatus } from '../utils';
 
 @Component({
   selector: 'my-bank-process-transaction-section',
   template: `
-    @if (
-      status === 'pending' || status === 'sending' || status === 'confirming'
-    ) {
+    @if (status === 'pending') {
+      <div class="flex flex-col gap-4 items-center">
+        <p>
+          Your transaction is ready to be sent. Press the button to proceed.
+        </p>
+
+        <button mat-raised-button color="primary" (click)="onSendTransaction()">
+          Send Transaction
+        </button>
+      </div>
+    } @else if (status === 'sending' || status === 'confirming') {
       <div class="flex flex-col gap-4 items-center">
         <mat-progress-spinner
           mode="indeterminate"
@@ -41,11 +50,16 @@ import { TransactionStatus } from '../utils';
     }
   `,
   standalone: true,
-  imports: [MatProgressSpinnerModule],
+  imports: [MatProgressSpinnerModule, MatButtonModule],
 })
 export class ProcessTransactionSectionComponent {
   @Input({ required: true }) status: TransactionStatus = 'pending';
   @Input({ required: true }) signature: string | null = null;
   @Input({ required: true }) error: string | null = null;
   @Input({ required: true }) explorerUrl: string | null = null;
+  @Output() sendTransaction = new EventEmitter();
+
+  onSendTransaction() {
+    this.sendTransaction.emit();
+  }
 }
