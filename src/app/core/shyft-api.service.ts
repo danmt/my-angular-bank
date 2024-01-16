@@ -25,17 +25,18 @@ export class ShyftApiService {
     localStorage.setItem('shyftApiKey', this.shyftApiKey());
   });
 
+  private readonly _headers = computed(() => ({
+    'x-api-key': this.shyftApiKey(),
+  }));
+
   getAccount(publicKey: PublicKey) {
     const url = createTokenBalanceUrl({
       publicKey: publicKey.toBase58(),
       mint: config.mint,
     });
-    const headers = {
-      'x-api-key': this.shyftApiKey(),
-    };
 
     return this._httpClient
-      .get<{ result: RawAccount }>(url, { headers })
+      .get<{ result: RawAccount }>(url, { headers: this._headers() })
       .pipe(map(({ result }) => toAccount(result)));
   }
 
@@ -44,12 +45,9 @@ export class ShyftApiService {
       account: publicKey.toBase58(),
       limit: 3,
     });
-    const headers = {
-      'x-api-key': this.shyftApiKey(),
-    };
 
     return this._httpClient
-      .get<{ result: RawTransaction[] }>(url, { headers })
+      .get<{ result: RawTransaction[] }>(url, { headers: this._headers() })
       .pipe(map(({ result }) => result.map(toTransaction)));
   }
 
