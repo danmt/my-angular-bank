@@ -80,9 +80,7 @@ This section delves into the core elements of web development essential for crea
   - **Selectors**: Target HTML elements.
   - **Properties**: Style attributes like color, font, width.
   - **Values**: Define the settings of properties.
-- **Box Model Concept**: The box model in CSS includes margins
-
-, borders, padding, and the content area, which collectively define the layout and size of HTML elements.
+- **Box Model Concept**: The box model in CSS includes margins, borders, padding, and the content area, which collectively define the layout and size of HTML elements.
 
 - **Responsive Design Principles**: Teach how to make web designs adaptable to various screen sizes using media queries, flexible grid layouts, and relative units.
 

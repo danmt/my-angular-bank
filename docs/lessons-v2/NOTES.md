@@ -19,7 +19,6 @@ Tasks:
 - Create an Nx standalone Angular workspace.
 - Set up Angular Material.
 - Set up TailwindCSS.
-- Include the assets.
 - Set up polyfills for the Buffer.
 
 ## Lesson #2
@@ -32,10 +31,10 @@ Theory class:
 - Wallet Adapter and its usage.
 - Shyft API to fetch accounts.
 - Forms in Angular.
-- Modals using Angular Material.
 - Stores in Angular.
 - Sections in Angular.
 - Pages in Angular.
+- Modals using Angular Material.
 
 Challenge: Connect wallet and visualize the total amount of USDC in the wallet.
 
