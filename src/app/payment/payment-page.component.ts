@@ -1,4 +1,9 @@
-import { Component, computed, inject } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  computed,
+  inject,
+} from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
 import { PublicKey } from '@solana/web3.js';
 import { injectQueryParams } from 'ngxtension/inject-query-params';
@@ -18,8 +23,6 @@ import { PayQrSectionComponent } from './pay-qr-section.component';
 import { PaymentSectionComponent } from './payment-section.component';
 
 @Component({
-  standalone: true,
-  imports: [PaymentSectionComponent, PayQrSectionComponent],
   selector: 'my-bank-payment-page',
   template: `
     <div class="flex gap-4 justify-center">
@@ -35,6 +38,12 @@ import { PaymentSectionComponent } from './payment-section.component';
       ></my-bank-pay-qr-section>
     </div>
   `,
+  imports: [PaymentSectionComponent, PayQrSectionComponent],
+  standalone: true,
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  host: {
+    class: 'block',
+  },
 })
 export class PaymentPageComponent {
   private readonly _matDialog = inject(MatDialog);

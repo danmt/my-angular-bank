@@ -1,4 +1,4 @@
-import { Component, inject } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
 import { MatDialogRef } from '@angular/material/dialog';
 import { MatIconModule } from '@angular/material/icon';
@@ -23,8 +23,12 @@ import {
       ></my-bank-transfer-form>
     </div>
   `,
-  standalone: true,
   imports: [MatButtonModule, MatIconModule, TransferFormComponent],
+  standalone: true,
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  host: {
+    class: 'block',
+  },
 })
 export class TransferModalComponent {
   private readonly _matDialogRef = inject(MatDialogRef<TransferModalComponent>);

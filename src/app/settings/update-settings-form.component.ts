@@ -1,4 +1,11 @@
-import { Component, EventEmitter, Input, Output, inject } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  EventEmitter,
+  Output,
+  inject,
+  input,
+} from '@angular/core';
 import { FormsModule, NgForm } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
 import { MatFormFieldModule } from '@angular/material/form-field';
@@ -22,7 +29,7 @@ export interface UpdateSettingsFormPayload {
         <input
           matInput
           name="shyftApiKey"
-          [(ngModel)]="model.shyftApiKey"
+          [(ngModel)]="model().shyftApiKey"
           #shyftApiKeyControl="ngModel"
           required
         />
@@ -38,7 +45,7 @@ export interface UpdateSettingsFormPayload {
       <div>
         <button
           type="submit"
-          [disabled]="disabled"
+          [disabled]="disabled()"
           mat-raised-button
           color="primary"
         >
@@ -47,26 +54,32 @@ export interface UpdateSettingsFormPayload {
       </div>
     </form>
   `,
-  standalone: true,
   imports: [FormsModule, MatFormFieldModule, MatInputModule, MatButtonModule],
+  standalone: true,
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  host: {
+    class: 'block',
+  },
 })
 export class UpdateSettingsFormComponent {
   private readonly _matSnackBar = inject(MatSnackBar);
 
-  @Input() model: UpdateSettingsFormModel = {
+  model = input<UpdateSettingsFormModel>({
     shyftApiKey: null,
-  };
-  @Input() disabled = false;
+  });
+  disabled = input(false);
   @Output() updateSettings = new EventEmitter<UpdateSettingsFormPayload>();
 
   onSubmit(form: NgForm) {
-    if (form.invalid || this.model.shyftApiKey === null) {
+    const model = this.model();
+
+    if (form.invalid || model.shyftApiKey === null) {
       this._matSnackBar.open('Invalid data, review form entries.', 'close', {
         duration: 3000,
       });
     } else {
       this.updateSettings.emit({
-        shyftApiKey: this.model.shyftApiKey,
+        shyftApiKey: model.shyftApiKey,
       });
     }
   }

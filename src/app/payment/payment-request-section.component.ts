@@ -1,7 +1,8 @@
 import { ClipboardModule } from '@angular/cdk/clipboard';
-import { Component, HostBinding, Input } from '@angular/core';
+import { ChangeDetectionStrategy, Component, input } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
+import { LetDirective } from '@ngrx/component';
 import { QRCodeModule } from 'angularx-qrcode';
 
 @Component({
@@ -11,6 +12,7 @@ import { QRCodeModule } from 'angularx-qrcode';
 
     <div
       class="rounded-md px-4 py-2 flex items-center gap-4 bg-black bg-opacity-10 mb-4"
+      *ngrxLet="url() as url"
     >
       @if (url !== null) {
         <p class="truncate flex-grow">{{ url }}</p>
@@ -27,7 +29,7 @@ import { QRCodeModule } from 'angularx-qrcode';
 
     <p class="mb-4">Use Solana Pay</p>
 
-    <div class="flex justify-center">
+    <div class="flex justify-center" *ngrxLet="solanaPayUrl() as solanaPayUrl">
       @if (solanaPayUrl !== null) {
         <qrcode
           [qrdata]="solanaPayUrl"
@@ -44,11 +46,20 @@ import { QRCodeModule } from 'angularx-qrcode';
       }
     </div>
   `,
+  imports: [
+    MatButtonModule,
+    MatIconModule,
+    ClipboardModule,
+    LetDirective,
+    QRCodeModule,
+  ],
   standalone: true,
-  imports: [MatButtonModule, MatIconModule, ClipboardModule, QRCodeModule],
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  host: {
+    class: 'block',
+  },
 })
 export class PaymentRequestSectionComponent {
-  @HostBinding() class = 'block';
-  @Input({ required: true }) url: string | null = null;
-  @Input({ required: true }) solanaPayUrl: string | null = null;
+  url = input.required<string | null>();
+  solanaPayUrl = input.required<string | null>();
 }

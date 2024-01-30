@@ -5,12 +5,14 @@ import { map } from 'rxjs';
 import {
   RawAccount,
   RawTransaction,
+  createTransactionFactory,
+  toAccount,
+} from '../models';
+import {
   config,
   createEndpointUrl,
   createTokenBalanceUrl,
   createTransactionHistoryUrl,
-  toAccount,
-  toTransaction,
 } from '../utils';
 
 @Injectable({ providedIn: 'root' })
@@ -48,7 +50,13 @@ export class ShyftApiService {
 
     return this._httpClient
       .get<{ result: RawTransaction[] }>(url, { headers: this._headers() })
-      .pipe(map(({ result }) => result.map(toTransaction)));
+      .pipe(
+        map(({ result }) => {
+          const transactionFactory = createTransactionFactory(publicKey);
+
+          return result.map(transactionFactory);
+        }),
+      );
   }
 
   setShyftApiKey(shyftApiKey: string) {

@@ -1,4 +1,9 @@
-import { Component, computed, inject } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  computed,
+  inject,
+} from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { MatIconModule } from '@angular/material/icon';
@@ -12,7 +17,7 @@ import {
   VersionedTransaction,
 } from '@solana/web3.js';
 import { firstValueFrom } from 'rxjs';
-import { createTransactionSender } from '../utils';
+import { createExplorerUrl, createTransactionSender } from '../utils';
 import { ProcessTransactionSectionComponent } from './process-transaction-section.component';
 
 export interface ProcessTransactionModalData {
@@ -24,7 +29,7 @@ export interface ProcessTransactionModalData {
   template: `
     <header class="flex gap-4 items-center px-4 pt-4">
       <h2 class="grow">
-        <span class="capitalize"> {{ status() }} </span>
+        <span class="capitalize"> {{ transactionSender().status }} </span>
         Transaction
       </h2>
       <button (click)="onClose()" mat-icon-button [disabled]="isRunning()">
@@ -34,16 +39,17 @@ export interface ProcessTransactionModalData {
 
     <div class="p-4 min-w-[350px] max-w-[450px]">
       <my-bank-process-transaction-section
-        [signature]="signature()"
-        [error]="error()"
-        [status]="status()"
-        [explorerUrl]="explorerUrl()"
+        [transactionState]="transactionSender()"
         (sendTransaction)="onSendTransaction()"
       ></my-bank-process-transaction-section>
     </div>
   `,
-  standalone: true,
   imports: [MatButtonModule, MatIconModule, ProcessTransactionSectionComponent],
+  standalone: true,
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  host: {
+    class: 'block',
+  },
 })
 export class ProcessTransactionModalComponent {
   private readonly _matDialogRef = inject(
@@ -61,14 +67,10 @@ export class ProcessTransactionModalComponent {
       options?: SendTransactionOptions,
     ) => this._walletStore.sendTransaction(transaction, connection, options),
   );
-  readonly error = computed(() => this.transactionSender().error);
-  readonly status = computed(() => this.transactionSender().status);
-  readonly signature = computed(() => this.transactionSender().signature);
   readonly isRunning = computed(
-    () => this.status() === 'sending' || this.status() === 'confirming',
-  );
-  readonly explorerUrl = computed(
-    () => `https://explorer.solana.com/tx/${this.signature()}`,
+    () =>
+      this.transactionSender().status === 'sending' ||
+      this.transactionSender().status === 'confirming',
   );
 
   async onSendTransaction() {
@@ -87,7 +89,7 @@ export class ProcessTransactionModalComponent {
     this._matDialogRef.disableClose = true;
 
     try {
-      await this.transactionSender.send(
+      const signature = await this.transactionSender.send(
         connection,
         publicKey,
         this._data.transactionInstructions,
@@ -97,7 +99,7 @@ export class ProcessTransactionModalComponent {
       console.log(
         '🎉 Transaction Succesfully Confirmed!',
         '\n',
-        this.explorerUrl(),
+        createExplorerUrl(signature),
       );
 
       // Display a toast notification.
@@ -106,7 +108,7 @@ export class ProcessTransactionModalComponent {
       });
     } catch (error) {
       // Log in the console the error.
-      console.error(this.error());
+      console.error(error);
 
       // Display a toast notification.
       this._matSnackBar.open('An error occurred.', 'close', {

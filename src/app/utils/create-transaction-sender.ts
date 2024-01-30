@@ -32,6 +32,7 @@ export type TransactionState =
       status: 'confirmed';
       signature: TransactionSignature;
       error: null;
+      explorerUrl: string;
     }
   | {
       status: 'failed';
@@ -125,6 +126,7 @@ export function createTransactionSender(
           status: 'confirmed',
           signature,
           error: null,
+          explorerUrl: `https://explorer.solana.com/tx/${signature}`,
         });
 
         return signature;

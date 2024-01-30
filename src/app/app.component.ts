@@ -1,4 +1,9 @@
-import { Component, OnInit, inject } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  OnInit,
+  inject,
+} from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
 import { MatDialog } from '@angular/material/dialog';
@@ -15,14 +20,6 @@ import {
 } from './settings';
 
 @Component({
-  standalone: true,
-  imports: [
-    RouterOutlet,
-    MatButtonModule,
-    MatCardModule,
-    MatIconModule,
-    HdWalletMultiButtonComponent,
-  ],
   selector: 'my-bank-root',
   template: `
     <header class="pb-8 pt-16 relative">
@@ -43,6 +40,18 @@ import {
       <router-outlet></router-outlet>
     </main>
   `,
+  imports: [
+    RouterOutlet,
+    MatButtonModule,
+    MatCardModule,
+    MatIconModule,
+    HdWalletMultiButtonComponent,
+  ],
+  standalone: true,
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  host: {
+    class: 'block',
+  },
 })
 export class AppComponent implements OnInit {
   private readonly _connectionStore = inject(ConnectionStore);

@@ -1,4 +1,11 @@
-import { Component, EventEmitter, Input, Output, inject } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  EventEmitter,
+  Output,
+  inject,
+  input,
+} from '@angular/core';
 import { FormsModule, NgForm } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
 import { MatFormFieldModule } from '@angular/material/form-field';
@@ -25,7 +32,7 @@ export interface RequestPaymentFormPayload {
         <input
           matInput
           name="memo"
-          [(ngModel)]="model.memo"
+          [(ngModel)]="model().memo"
           #memoControl="ngModel"
           required
         />
@@ -44,7 +51,7 @@ export interface RequestPaymentFormPayload {
           matInput
           name="amount"
           type="number"
-          [(ngModel)]="model.amount"
+          [(ngModel)]="model().amount"
           #amountControl="ngModel"
           required
           min="0.01"
@@ -64,7 +71,7 @@ export interface RequestPaymentFormPayload {
       <footer>
         <button
           type="submit"
-          [disabled]="disabled"
+          [disabled]="disabled()"
           mat-raised-button
           color="primary"
         >
@@ -73,32 +80,34 @@ export interface RequestPaymentFormPayload {
       </footer>
     </form>
   `,
-  standalone: true,
   imports: [FormsModule, MatFormFieldModule, MatInputModule, MatButtonModule],
+  standalone: true,
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  host: {
+    class: 'block',
+  },
 })
 export class RequestPaymentFormComponent {
   private readonly _matSnackBar = inject(MatSnackBar);
 
-  @Input() model: RequestPaymentFormModel = {
+  model = input<RequestPaymentFormModel>({
     amount: null,
     memo: null,
-  };
-  @Input() disabled = false;
+  });
+  disabled = input(false);
   @Output() requestPayment = new EventEmitter<RequestPaymentFormPayload>();
 
   onSubmit(form: NgForm) {
-    if (
-      form.invalid ||
-      this.model.amount === null ||
-      this.model.memo === null
-    ) {
+    const model = this.model();
+
+    if (form.invalid || model.amount === null || model.memo === null) {
       this._matSnackBar.open('Invalid data, review form entries.', 'close', {
         duration: 3000,
       });
     } else {
       this.requestPayment.emit({
-        amount: fromUserValue(this.model.amount),
-        memo: this.model.memo,
+        amount: fromUserValue(model.amount),
+        memo: model.memo,
       });
     }
   }

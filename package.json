@@ -29,7 +29,7 @@
     "@solana/wallet-adapter-base": "0.9.22",
     "@solana/web3.js": "1.87.6",
     "angularx-qrcode": "17.0.0",
-    "ngxtension": "^1.7.0",
+    "ngxtension": "^1.12.0",
     "rxjs": "~7.8.0",
     "tslib": "^2.3.0",
     "zone.js": "0.14.3"

@@ -5,7 +5,8 @@ import { PublicKey } from '@solana/web3.js';
 import { computedFrom } from 'ngxtension/computed-from';
 import { catchError, map, of, startWith, switchMap } from 'rxjs';
 import { ShyftApiService } from '../core';
-import { Transaction, config, stringifyError } from '../utils';
+import { Transaction } from '../models';
+import { config, stringifyError } from '../utils';
 
 export interface TransactionsState {
   transactions: Transaction[] | null;

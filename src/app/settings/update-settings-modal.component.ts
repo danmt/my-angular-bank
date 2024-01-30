@@ -1,4 +1,4 @@
-import { Component, inject } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { MatIconModule } from '@angular/material/icon';
@@ -37,8 +37,12 @@ export interface UpdateSettingsModalData {
       </a>
     </footer>
   `,
-  standalone: true,
   imports: [MatButtonModule, MatIconModule, UpdateSettingsFormComponent],
+  standalone: true,
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  host: {
+    class: 'block',
+  },
 })
 export class UpdateSettingsModalComponent {
   private readonly _matDialogRef = inject(

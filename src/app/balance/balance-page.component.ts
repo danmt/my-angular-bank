@@ -30,12 +30,6 @@ import { TransactionsSectionComponent } from './transactions-section.component';
 import { TransactionsStore } from './transactions.store';
 
 @Component({
-  standalone: true,
-  imports: [
-    BalanceSectionComponent,
-    DepositQrSectionComponent,
-    TransactionsSectionComponent,
-  ],
   selector: 'my-bank-balance-page',
   template: `
     <div class="flex gap-4 justify-center mb-4">
@@ -54,12 +48,20 @@ import { TransactionsStore } from './transactions.store';
     <div class="flex justify-center">
       <my-bank-transactions-section
         [transactions]="transactions()"
-        [publicKey]="publicKey()"
       ></my-bank-transactions-section>
     </div>
   `,
+  imports: [
+    BalanceSectionComponent,
+    DepositQrSectionComponent,
+    TransactionsSectionComponent,
+  ],
   providers: [BalanceStore, TransactionsStore],
+  standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
+  host: {
+    class: 'block',
+  },
 })
 export class BalancePageComponent {
   private readonly _matDialog = inject(MatDialog);

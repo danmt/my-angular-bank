@@ -1,17 +1,18 @@
 import { DatePipe, NgClass } from '@angular/common';
-import { Component, HostBinding, Input } from '@angular/core';
+import { ChangeDetectionStrategy, Component, input } from '@angular/core';
 import { MatCardModule } from '@angular/material/card';
 import { MatIconModule } from '@angular/material/icon';
 import { MatTableModule } from '@angular/material/table';
-import { PublicKey } from '@solana/web3.js';
-import { Transaction } from '../utils';
+import { LetDirective } from '@ngrx/component';
+import { Transaction } from '../models';
 
 @Component({
-  standalone: true,
-  imports: [NgClass, DatePipe, MatCardModule, MatIconModule, MatTableModule],
   selector: 'my-bank-transactions-section',
   template: `
-    <mat-card class="px-4 py-8 w-[700px] h-full flex flex-col">
+    <mat-card
+      class="px-4 py-8 w-[700px] h-full flex flex-col"
+      *ngrxLet="transactions() as transactions"
+    >
       <header class="mb-4">
         <h2 class="text-3xl text-center">Transaction History</h2>
       </header>
@@ -52,14 +53,8 @@ import { Transaction } from '../utils';
               mat-cell
               *matCellDef="let element"
               [ngClass]="{
-                'text-green-500':
-                  element.type === 'transfer' &&
-                  publicKey !== null &&
-                  element.sender !== publicKey.toBase58(),
-                'text-red-500':
-                  element.type === 'transfer' &&
-                  publicKey !== null &&
-                  element.sender === publicKey.toBase58()
+                'text-green-500': element.isSender,
+                'text-red-500': !element.isSender
               }"
               class="text-lg font-bold"
             >
@@ -81,11 +76,22 @@ import { Transaction } from '../utils';
       }
     </mat-card>
   `,
+  imports: [
+    NgClass,
+    DatePipe,
+    MatCardModule,
+    MatIconModule,
+    MatTableModule,
+    LetDirective,
+  ],
+  standalone: true,
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  host: {
+    class: 'block',
+  },
 })
 export class TransactionsSectionComponent {
-  @HostBinding() class = 'block';
-  @Input({ required: true }) transactions: Transaction[] | null = null;
-  @Input({ required: true }) publicKey: PublicKey | null = null;
+  transactions = input.required<Transaction[] | null>();
 
   readonly displayedColumns = ['timestamp', 'memo', 'amount'];
 }
