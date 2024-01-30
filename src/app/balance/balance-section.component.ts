@@ -9,6 +9,7 @@ import {
 import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
 import { MatIconModule } from '@angular/material/icon';
+import { LetDirective } from '@ngrx/component';
 import { ToUserValuePipe } from '../shared';
 
 @Component({
@@ -28,9 +29,9 @@ import { ToUserValuePipe } from '../shared';
       <div class="grow flex justify-center items-center gap-2 mb-4">
         <img src="assets/usdc-logo.png" class="w-24 h-24" />
 
-        <p class="text-7xl">
-          @if (balance() !== null) {
-            {{ balance() | number: '2.2-2' }}
+        <p class="text-7xl" *ngrxLet="balance() as balance">
+          @if (balance !== null) {
+            {{ balance | number: '2.2-2' }}
           } @else {
             -
           }
@@ -53,6 +54,7 @@ import { ToUserValuePipe } from '../shared';
     MatButtonModule,
     MatCardModule,
     MatIconModule,
+    LetDirective,
     ToUserValuePipe,
   ],
   standalone: true,
