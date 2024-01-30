@@ -1,12 +1,6 @@
 import { ClipboardModule } from '@angular/cdk/clipboard';
 import { DecimalPipe } from '@angular/common';
-import {
-  ChangeDetectionStrategy,
-  Component,
-  EventEmitter,
-  Output,
-  input,
-} from '@angular/core';
+import { Component, EventEmitter, Output, input } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
 import { MatIconModule } from '@angular/material/icon';
@@ -83,16 +77,12 @@ import { ToUserValuePipe } from '../shared';
     ToUserValuePipe,
   ],
   standalone: true,
-  changeDetection: ChangeDetectionStrategy.OnPush,
-  host: {
-    class: 'block',
-  },
 })
 export class PaymentSectionComponent {
-  amount = input.required<number | null>();
-  memo = input.required<string | null>();
-  requester = input.required<string | null>();
-  @Output() approvePayment = new EventEmitter();
+  readonly amount = input.required<number | null>();
+  readonly memo = input.required<string | null>();
+  readonly requester = input.required<string | null>();
+  @Output() readonly approvePayment = new EventEmitter();
 
   onApprovePayment() {
     this.approvePayment.emit();

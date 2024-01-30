@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, input } from '@angular/core';
+import { Component, input } from '@angular/core';
 import { MatCardModule } from '@angular/material/card';
 import { LetDirective } from '@ngrx/component';
 import { QRCodeModule } from 'angularx-qrcode';
@@ -28,11 +28,7 @@ import { QRCodeModule } from 'angularx-qrcode';
   `,
   imports: [MatCardModule, LetDirective, QRCodeModule],
   standalone: true,
-  changeDetection: ChangeDetectionStrategy.OnPush,
-  host: {
-    class: 'block',
-  },
 })
 export class PayQrSectionComponent {
-  solanaPayUrl = input.required<string | null>();
+  readonly solanaPayUrl = input.required<string | null>();
 }

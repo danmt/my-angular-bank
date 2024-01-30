@@ -1,5 +1,5 @@
 import { DatePipe, NgClass } from '@angular/common';
-import { ChangeDetectionStrategy, Component, input } from '@angular/core';
+import { Component, input } from '@angular/core';
 import { MatCardModule } from '@angular/material/card';
 import { MatIconModule } from '@angular/material/icon';
 import { MatTableModule } from '@angular/material/table';
@@ -85,13 +85,8 @@ import { Transaction } from '../models';
     LetDirective,
   ],
   standalone: true,
-  changeDetection: ChangeDetectionStrategy.OnPush,
-  host: {
-    class: 'block',
-  },
 })
 export class TransactionsSectionComponent {
-  transactions = input.required<Transaction[] | null>();
-
   readonly displayedColumns = ['timestamp', 'memo', 'amount'];
+  readonly transactions = input.required<Transaction[] | null>();
 }

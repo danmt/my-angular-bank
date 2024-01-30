@@ -1,10 +1,4 @@
-import {
-  ChangeDetectionStrategy,
-  Component,
-  EventEmitter,
-  Output,
-  input,
-} from '@angular/core';
+import { Component, EventEmitter, Output, input } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { LetDirective } from '@ngrx/component';
@@ -67,14 +61,10 @@ import { TransactionState } from '../utils';
   `,
   imports: [MatProgressSpinnerModule, MatButtonModule, LetDirective],
   standalone: true,
-  changeDetection: ChangeDetectionStrategy.OnPush,
-  host: {
-    class: 'block',
-  },
 })
 export class ProcessTransactionSectionComponent {
-  transactionState = input.required<TransactionState>();
-  @Output() sendTransaction = new EventEmitter();
+  readonly transactionState = input.required<TransactionState>();
+  @Output() readonly sendTransaction = new EventEmitter();
 
   onSendTransaction() {
     this.sendTransaction.emit();

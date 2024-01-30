@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { MatDialog } from '@angular/material/dialog';
 import { WalletStore } from '@heavy-duty/wallet-adapter';
@@ -58,10 +58,6 @@ import { TransactionsStore } from './transactions.store';
   ],
   providers: [BalanceStore, TransactionsStore],
   standalone: true,
-  changeDetection: ChangeDetectionStrategy.OnPush,
-  host: {
-    class: 'block',
-  },
 })
 export class BalancePageComponent {
   private readonly _matDialog = inject(MatDialog);

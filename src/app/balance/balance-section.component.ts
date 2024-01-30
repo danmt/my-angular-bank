@@ -1,11 +1,5 @@
 import { DecimalPipe } from '@angular/common';
-import {
-  ChangeDetectionStrategy,
-  Component,
-  EventEmitter,
-  Output,
-  input,
-} from '@angular/core';
+import { Component, EventEmitter, Output, input } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
 import { MatIconModule } from '@angular/material/icon';
@@ -58,16 +52,12 @@ import { ToUserValuePipe } from '../shared';
     ToUserValuePipe,
   ],
   standalone: true,
-  changeDetection: ChangeDetectionStrategy.OnPush,
-  host: {
-    class: 'block',
-  },
 })
 export class BalanceSectionComponent {
-  balance = input.required<number | null>();
-  @Output() reload = new EventEmitter();
-  @Output() transfer = new EventEmitter();
-  @Output() requestPayment = new EventEmitter();
+  readonly balance = input.required<number | null>();
+  @Output() readonly reload = new EventEmitter();
+  @Output() readonly transfer = new EventEmitter();
+  @Output() readonly requestPayment = new EventEmitter();
 
   onReload() {
     this.reload.emit();

@@ -1,11 +1,4 @@
-import {
-  ChangeDetectionStrategy,
-  Component,
-  EventEmitter,
-  Output,
-  inject,
-  input,
-} from '@angular/core';
+import { Component, EventEmitter, Output, inject, input } from '@angular/core';
 import { FormsModule, NgForm } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
 import { MatFormFieldModule } from '@angular/material/form-field';
@@ -101,21 +94,17 @@ export interface TransferFormPayload {
   `,
   imports: [FormsModule, MatFormFieldModule, MatInputModule, MatButtonModule],
   standalone: true,
-  changeDetection: ChangeDetectionStrategy.OnPush,
-  host: {
-    class: 'block',
-  },
 })
 export class TransferFormComponent {
   private readonly _matSnackBar = inject(MatSnackBar);
 
-  model = input<TransferFormModel>({
+  readonly model = input<TransferFormModel>({
     receiver: null,
     amount: null,
     memo: null,
   });
-  disabled = input(false);
-  @Output() transfer = new EventEmitter<TransferFormPayload>();
+  readonly disabled = input(false);
+  @Output() readonly transfer = new EventEmitter<TransferFormPayload>();
 
   onSubmit(form: NgForm) {
     const model = this.model();

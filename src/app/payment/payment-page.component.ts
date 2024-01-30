@@ -1,9 +1,4 @@
-import {
-  ChangeDetectionStrategy,
-  Component,
-  computed,
-  inject,
-} from '@angular/core';
+import { Component, computed, inject } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
 import { PublicKey } from '@solana/web3.js';
 import { injectQueryParams } from 'ngxtension/inject-query-params';
@@ -40,10 +35,6 @@ import { PaymentSectionComponent } from './payment-section.component';
   `,
   imports: [PaymentSectionComponent, PayQrSectionComponent],
   standalone: true,
-  changeDetection: ChangeDetectionStrategy.OnPush,
-  host: {
-    class: 'block',
-  },
 })
 export class PaymentPageComponent {
   private readonly _matDialog = inject(MatDialog);

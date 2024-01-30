@@ -1,5 +1,5 @@
 import { ClipboardModule } from '@angular/cdk/clipboard';
-import { ChangeDetectionStrategy, Component, input } from '@angular/core';
+import { Component, input } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { LetDirective } from '@ngrx/component';
@@ -54,12 +54,8 @@ import { QRCodeModule } from 'angularx-qrcode';
     QRCodeModule,
   ],
   standalone: true,
-  changeDetection: ChangeDetectionStrategy.OnPush,
-  host: {
-    class: 'block',
-  },
 })
 export class PaymentRequestSectionComponent {
-  url = input.required<string | null>();
-  solanaPayUrl = input.required<string | null>();
+  readonly url = input.required<string | null>();
+  readonly solanaPayUrl = input.required<string | null>();
 }

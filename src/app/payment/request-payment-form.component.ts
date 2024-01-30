@@ -1,11 +1,4 @@
-import {
-  ChangeDetectionStrategy,
-  Component,
-  EventEmitter,
-  Output,
-  inject,
-  input,
-} from '@angular/core';
+import { Component, EventEmitter, Output, inject, input } from '@angular/core';
 import { FormsModule, NgForm } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
 import { MatFormFieldModule } from '@angular/material/form-field';
@@ -82,20 +75,17 @@ export interface RequestPaymentFormPayload {
   `,
   imports: [FormsModule, MatFormFieldModule, MatInputModule, MatButtonModule],
   standalone: true,
-  changeDetection: ChangeDetectionStrategy.OnPush,
-  host: {
-    class: 'block',
-  },
 })
 export class RequestPaymentFormComponent {
   private readonly _matSnackBar = inject(MatSnackBar);
 
-  model = input<RequestPaymentFormModel>({
+  readonly model = input<RequestPaymentFormModel>({
     amount: null,
     memo: null,
   });
-  disabled = input(false);
-  @Output() requestPayment = new EventEmitter<RequestPaymentFormPayload>();
+  readonly disabled = input(false);
+  @Output() readonly requestPayment =
+    new EventEmitter<RequestPaymentFormPayload>();
 
   onSubmit(form: NgForm) {
     const model = this.model();

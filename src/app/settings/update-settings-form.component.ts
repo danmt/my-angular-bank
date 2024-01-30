@@ -1,11 +1,4 @@
-import {
-  ChangeDetectionStrategy,
-  Component,
-  EventEmitter,
-  Output,
-  inject,
-  input,
-} from '@angular/core';
+import { Component, EventEmitter, Output, inject, input } from '@angular/core';
 import { FormsModule, NgForm } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
 import { MatFormFieldModule } from '@angular/material/form-field';
@@ -56,19 +49,16 @@ export interface UpdateSettingsFormPayload {
   `,
   imports: [FormsModule, MatFormFieldModule, MatInputModule, MatButtonModule],
   standalone: true,
-  changeDetection: ChangeDetectionStrategy.OnPush,
-  host: {
-    class: 'block',
-  },
 })
 export class UpdateSettingsFormComponent {
   private readonly _matSnackBar = inject(MatSnackBar);
 
-  model = input<UpdateSettingsFormModel>({
+  readonly model = input<UpdateSettingsFormModel>({
     shyftApiKey: null,
   });
-  disabled = input(false);
-  @Output() updateSettings = new EventEmitter<UpdateSettingsFormPayload>();
+  readonly disabled = input(false);
+  @Output() readonly updateSettings =
+    new EventEmitter<UpdateSettingsFormPayload>();
 
   onSubmit(form: NgForm) {
     const model = this.model();
