@@ -1,7 +1,7 @@
 import { Component, computed, inject } from '@angular/core';
-import { MatButtonModule } from '@angular/material/button';
+import { MatButton } from '@angular/material/button';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
-import { MatIconModule } from '@angular/material/icon';
+import { MatIcon } from '@angular/material/icon';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { ConnectionStore, WalletStore } from '@heavy-duty/wallet-adapter';
 import { SendTransactionOptions } from '@solana/wallet-adapter-base';
@@ -39,7 +39,7 @@ export interface ProcessTransactionModalData {
       ></my-bank-process-transaction-section>
     </div>
   `,
-  imports: [MatButtonModule, MatIconModule, ProcessTransactionSectionComponent],
+  imports: [MatButton, MatIcon, ProcessTransactionSectionComponent],
   standalone: true,
 })
 export class ProcessTransactionModalComponent {

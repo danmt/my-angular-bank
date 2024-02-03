@@ -1,8 +1,8 @@
 import { Component, OnInit, inject } from '@angular/core';
-import { MatButtonModule } from '@angular/material/button';
-import { MatCardModule } from '@angular/material/card';
+import { MatButton } from '@angular/material/button';
+import { MatCard } from '@angular/material/card';
 import { MatDialog } from '@angular/material/dialog';
-import { MatIconModule } from '@angular/material/icon';
+import { MatIcon } from '@angular/material/icon';
 import { RouterOutlet } from '@angular/router';
 import { ConnectionStore } from '@heavy-duty/wallet-adapter';
 import { HdWalletMultiButtonComponent } from '@heavy-duty/wallet-adapter-material';
@@ -37,9 +37,9 @@ import {
   `,
   imports: [
     RouterOutlet,
-    MatButtonModule,
-    MatCardModule,
-    MatIconModule,
+    MatButton,
+    MatCard,
+    MatIcon,
     HdWalletMultiButtonComponent,
   ],
   standalone: true,

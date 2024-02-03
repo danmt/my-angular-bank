@@ -1,7 +1,7 @@
 import { Component, inject } from '@angular/core';
-import { MatButtonModule } from '@angular/material/button';
+import { MatButton } from '@angular/material/button';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
-import { MatIconModule } from '@angular/material/icon';
+import { MatIcon } from '@angular/material/icon';
 import { PublicKey } from '@solana/web3.js';
 import {
   config,
@@ -34,7 +34,7 @@ export interface PaymentRequestModalData {
       ></my-bank-payment-request-section>
     </div>
   `,
-  imports: [MatButtonModule, MatIconModule, PaymentRequestSectionComponent],
+  imports: [MatButton, MatIcon, PaymentRequestSectionComponent],
   standalone: true,
 })
 export class PaymentRequestModalComponent {

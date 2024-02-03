@@ -1,9 +1,9 @@
-import { ClipboardModule } from '@angular/cdk/clipboard';
+import { CdkCopyToClipboard } from '@angular/cdk/clipboard';
 import { DecimalPipe } from '@angular/common';
 import { Component, EventEmitter, Output, input } from '@angular/core';
-import { MatButtonModule } from '@angular/material/button';
-import { MatCardModule } from '@angular/material/card';
-import { MatIconModule } from '@angular/material/icon';
+import { MatButton } from '@angular/material/button';
+import { MatCard } from '@angular/material/card';
+import { MatIcon } from '@angular/material/icon';
 import { HdObscureAddressPipe } from '@heavy-duty/wallet-adapter-cdk';
 import { LetDirective } from '@ngrx/component';
 import { ToUserValuePipe } from '../shared';
@@ -68,10 +68,10 @@ import { ToUserValuePipe } from '../shared';
   `,
   imports: [
     DecimalPipe,
-    MatButtonModule,
-    MatCardModule,
-    MatIconModule,
-    ClipboardModule,
+    MatButton,
+    MatCard,
+    MatIcon,
+    CdkCopyToClipboard,
     LetDirective,
     HdObscureAddressPipe,
     ToUserValuePipe,

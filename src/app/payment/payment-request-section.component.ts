@@ -1,7 +1,7 @@
-import { ClipboardModule } from '@angular/cdk/clipboard';
+import { CdkCopyToClipboard } from '@angular/cdk/clipboard';
 import { Component, input } from '@angular/core';
-import { MatButtonModule } from '@angular/material/button';
-import { MatIconModule } from '@angular/material/icon';
+import { MatButton } from '@angular/material/button';
+import { MatIcon } from '@angular/material/icon';
 import { LetDirective } from '@ngrx/component';
 import { QRCodeModule } from 'angularx-qrcode';
 
@@ -46,13 +46,7 @@ import { QRCodeModule } from 'angularx-qrcode';
       }
     </div>
   `,
-  imports: [
-    MatButtonModule,
-    MatIconModule,
-    ClipboardModule,
-    LetDirective,
-    QRCodeModule,
-  ],
+  imports: [MatButton, MatIcon, CdkCopyToClipboard, LetDirective, QRCodeModule],
   standalone: true,
 })
 export class PaymentRequestSectionComponent {

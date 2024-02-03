@@ -1,6 +1,6 @@
 import { Component, EventEmitter, Output, input } from '@angular/core';
-import { MatButtonModule } from '@angular/material/button';
-import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { MatButton } from '@angular/material/button';
+import { MatProgressSpinner } from '@angular/material/progress-spinner';
 import { LetDirective } from '@ngrx/component';
 import { TransactionState } from '../utils';
 
@@ -59,7 +59,7 @@ import { TransactionState } from '../utils';
       }
     </div>
   `,
-  imports: [MatProgressSpinnerModule, MatButtonModule, LetDirective],
+  imports: [MatProgressSpinner, MatButton, LetDirective],
   standalone: true,
 })
 export class ProcessTransactionSectionComponent {

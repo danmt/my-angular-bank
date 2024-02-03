@@ -1,7 +1,7 @@
 import { Component, inject } from '@angular/core';
-import { MatButtonModule } from '@angular/material/button';
+import { MatButton } from '@angular/material/button';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
-import { MatIconModule } from '@angular/material/icon';
+import { MatIcon } from '@angular/material/icon';
 import {
   UpdateSettingsFormComponent,
   UpdateSettingsFormPayload,
@@ -37,7 +37,7 @@ export interface UpdateSettingsModalData {
       </a>
     </footer>
   `,
-  imports: [MatButtonModule, MatIconModule, UpdateSettingsFormComponent],
+  imports: [MatButton, MatIcon, UpdateSettingsFormComponent],
   standalone: true,
 })
 export class UpdateSettingsModalComponent {

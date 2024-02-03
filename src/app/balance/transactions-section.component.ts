@@ -1,8 +1,19 @@
 import { DatePipe, NgClass } from '@angular/common';
 import { Component, input } from '@angular/core';
-import { MatCardModule } from '@angular/material/card';
-import { MatIconModule } from '@angular/material/icon';
-import { MatTableModule } from '@angular/material/table';
+import { MatCard } from '@angular/material/card';
+import { MatIcon } from '@angular/material/icon';
+import {
+  MatCell,
+  MatCellDef,
+  MatColumnDef,
+  MatHeaderCell,
+  MatHeaderCellDef,
+  MatHeaderRow,
+  MatHeaderRowDef,
+  MatRow,
+  MatRowDef,
+  MatTable,
+} from '@angular/material/table';
 import { LetDirective } from '@ngrx/component';
 import { Transaction } from '../models';
 
@@ -79,9 +90,18 @@ import { Transaction } from '../models';
   imports: [
     NgClass,
     DatePipe,
-    MatCardModule,
-    MatIconModule,
-    MatTableModule,
+    MatCard,
+    MatIcon,
+    MatTable,
+    MatRow,
+    MatRowDef,
+    MatCell,
+    MatCellDef,
+    MatHeaderRow,
+    MatHeaderRowDef,
+    MatHeaderCell,
+    MatHeaderCellDef,
+    MatColumnDef,
     LetDirective,
   ],
   standalone: true,

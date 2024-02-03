@@ -1,8 +1,8 @@
 import { DecimalPipe } from '@angular/common';
 import { Component, EventEmitter, Output, input } from '@angular/core';
-import { MatButtonModule } from '@angular/material/button';
-import { MatCardModule } from '@angular/material/card';
-import { MatIconModule } from '@angular/material/icon';
+import { MatButton } from '@angular/material/button';
+import { MatCard } from '@angular/material/card';
+import { MatIcon } from '@angular/material/icon';
 import { LetDirective } from '@ngrx/component';
 import { ToUserValuePipe } from '../shared';
 
@@ -45,9 +45,9 @@ import { ToUserValuePipe } from '../shared';
   `,
   imports: [
     DecimalPipe,
-    MatButtonModule,
-    MatCardModule,
-    MatIconModule,
+    MatButton,
+    MatCard,
+    MatIcon,
     LetDirective,
     ToUserValuePipe,
   ],

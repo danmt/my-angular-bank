@@ -1,5 +1,5 @@
 import { Component, input } from '@angular/core';
-import { MatCardModule } from '@angular/material/card';
+import { MatCard } from '@angular/material/card';
 import { LetDirective } from '@ngrx/component';
 import { QRCodeModule } from 'angularx-qrcode';
 
@@ -34,7 +34,7 @@ import { QRCodeModule } from 'angularx-qrcode';
       </div>
     </mat-card>
   `,
-  imports: [MatCardModule, LetDirective, QRCodeModule],
+  imports: [MatCard, LetDirective, QRCodeModule],
   standalone: true,
 })
 export class DepositQrSectionComponent {

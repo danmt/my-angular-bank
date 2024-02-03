@@ -1,8 +1,8 @@
 import { Component, EventEmitter, Output, inject, input } from '@angular/core';
 import { FormsModule, NgForm } from '@angular/forms';
-import { MatButtonModule } from '@angular/material/button';
-import { MatFormFieldModule } from '@angular/material/form-field';
-import { MatInputModule } from '@angular/material/input';
+import { MatButton } from '@angular/material/button';
+import { MatError, MatFormField, MatLabel } from '@angular/material/form-field';
+import { MatInput } from '@angular/material/input';
 import { MatSnackBar } from '@angular/material/snack-bar';
 
 export interface UpdateSettingsFormModel {
@@ -47,7 +47,7 @@ export interface UpdateSettingsFormPayload {
       </div>
     </form>
   `,
-  imports: [FormsModule, MatFormFieldModule, MatInputModule, MatButtonModule],
+  imports: [FormsModule, MatFormField, MatInput, MatLabel, MatError, MatButton],
   standalone: true,
 })
 export class UpdateSettingsFormComponent {
