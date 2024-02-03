@@ -1,0 +1,65 @@
+import { HttpClient } from '@angular/common/http';
+import { Injectable, computed, effect, inject, signal } from '@angular/core';
+import { PublicKey } from '@solana/web3.js';
+import { map } from 'rxjs';
+import {
+  RawAccount,
+  RawTransaction,
+  createTransactionFactory,
+  toAccount,
+} from '../models';
+import {
+  config,
+  createEndpointUrl,
+  createTokenBalanceUrl,
+  createTransactionHistoryUrl,
+} from '../utils';
+
+@Injectable({ providedIn: 'root' })
+export class ShyftApiService {
+  private readonly _httpClient = inject(HttpClient);
+
+  readonly shyftApiKey = signal(
+    localStorage.getItem('shyftApiKey') ?? config.shyftApiKey,
+  );
+  readonly endpoint = computed(() => createEndpointUrl(this.shyftApiKey()));
+  readonly syncLocalStorage = effect(() => {
+    localStorage.setItem('shyftApiKey', this.shyftApiKey());
+  });
+
+  private readonly _headers = computed(() => ({
+    'x-api-key': this.shyftApiKey(),
+  }));
+
+  getAccount(publicKey: PublicKey) {
+    const url = createTokenBalanceUrl({
+      publicKey: publicKey.toBase58(),
+      mint: config.mint,
+    });
+
+    return this._httpClient
+      .get<{ result: RawAccount }>(url, { headers: this._headers() })
+      .pipe(map(({ result }) => toAccount(result)));
+  }
+
+  getTransactions(publicKey: PublicKey) {
+    const url = createTransactionHistoryUrl({
+      account: publicKey.toBase58(),
+      limit: 3,
+    });
+
+    return this._httpClient
+      .get<{ result: RawTransaction[] }>(url, { headers: this._headers() })
+      .pipe(
+        map(({ result }) => {
+          const transactionFactory = createTransactionFactory(publicKey);
+
+          return result.map(transactionFactory);
+        }),
+      );
+  }
+
+  setShyftApiKey(shyftApiKey: string) {
+    this.shyftApiKey.set(shyftApiKey);
+  }
+}

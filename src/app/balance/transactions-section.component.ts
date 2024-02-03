@@ -1,16 +1,29 @@
 import { DatePipe, NgClass } from '@angular/common';
-import { Component, HostBinding, Input } from '@angular/core';
-import { MatCardModule } from '@angular/material/card';
-import { MatIconModule } from '@angular/material/icon';
-import { MatTableModule } from '@angular/material/table';
-import { Transaction } from '../core';
+import { Component, input } from '@angular/core';
+import { MatCard } from '@angular/material/card';
+import { MatIcon } from '@angular/material/icon';
+import {
+  MatCell,
+  MatCellDef,
+  MatColumnDef,
+  MatHeaderCell,
+  MatHeaderCellDef,
+  MatHeaderRow,
+  MatHeaderRowDef,
+  MatRow,
+  MatRowDef,
+  MatTable,
+} from '@angular/material/table';
+import { LetDirective } from '@ngrx/component';
+import { Transaction } from '../models';
 
 @Component({
-  standalone: true,
-  imports: [NgClass, DatePipe, MatCardModule, MatIconModule, MatTableModule],
   selector: 'my-bank-transactions-section',
   template: `
-    <mat-card class="px-4 py-8 w-[700px] h-full flex flex-col">
+    <mat-card
+      class="px-4 py-8 w-[700px] h-full flex flex-col"
+      *ngrxLet="transactions() as transactions"
+    >
       <header class="mb-4">
         <h2 class="text-3xl text-center">Transaction History</h2>
       </header>
@@ -51,9 +64,8 @@ import { Transaction } from '../core';
               mat-cell
               *matCellDef="let element"
               [ngClass]="{
-                'text-green-500':
-                  element.sign !== undefined && element.sign > 0,
-                'text-red-500': element.sign !== undefined && element.sign < 0
+                'text-green-500': element.isSender,
+                'text-red-500': !element.isSender
               }"
               class="text-lg font-bold"
             >
@@ -75,10 +87,26 @@ import { Transaction } from '../core';
       }
     </mat-card>
   `,
+  imports: [
+    NgClass,
+    DatePipe,
+    MatCard,
+    MatIcon,
+    MatTable,
+    MatRow,
+    MatRowDef,
+    MatCell,
+    MatCellDef,
+    MatHeaderRow,
+    MatHeaderRowDef,
+    MatHeaderCell,
+    MatHeaderCellDef,
+    MatColumnDef,
+    LetDirective,
+  ],
+  standalone: true,
 })
 export class TransactionsSectionComponent {
-  @HostBinding() class = 'block';
-  @Input({ required: true }) transactions: Transaction[] | null = null;
-
   readonly displayedColumns = ['timestamp', 'memo', 'amount'];
+  readonly transactions = input.required<Transaction[] | null>();
 }

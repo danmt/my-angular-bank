@@ -1,10 +1,9 @@
-import { Component, HostBinding, Input } from '@angular/core';
-import { MatCardModule } from '@angular/material/card';
+import { Component, input } from '@angular/core';
+import { MatCard } from '@angular/material/card';
+import { LetDirective } from '@ngrx/component';
 import { QRCodeModule } from 'angularx-qrcode';
 
 @Component({
-  standalone: true,
-  imports: [MatCardModule, QRCodeModule],
   selector: 'my-bank-deposit-qr-section',
   template: `
     <mat-card class="px-4 py-8 w-[400px] h-full">
@@ -12,8 +11,11 @@ import { QRCodeModule } from 'angularx-qrcode';
         <h2 class="text-3xl text-center">Deposit using Solana Pay</h2>
       </header>
 
-      <div class="flex justify-center">
-        @if (solanaPayDepositUrl !== null) {
+      <div
+        class="flex justify-center"
+        *ngrxLet="solanaPayDepositUrl() as solanaPayDepositUrl"
+      >
+        @if (solanaPayDepositUrl) {
           <qrcode
             [qrdata]="solanaPayDepositUrl"
             [width]="256"
@@ -32,8 +34,9 @@ import { QRCodeModule } from 'angularx-qrcode';
       </div>
     </mat-card>
   `,
+  imports: [MatCard, LetDirective, QRCodeModule],
+  standalone: true,
 })
 export class DepositQrSectionComponent {
-  @HostBinding() class = 'block';
-  @Input({ required: true }) solanaPayDepositUrl: string | null = null;
+  readonly solanaPayDepositUrl = input.required<string | null>();
 }

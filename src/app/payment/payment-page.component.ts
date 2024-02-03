@@ -18,8 +18,6 @@ import { PayQrSectionComponent } from './pay-qr-section.component';
 import { PaymentSectionComponent } from './payment-section.component';
 
 @Component({
-  standalone: true,
-  imports: [PaymentSectionComponent, PayQrSectionComponent],
   selector: 'my-bank-payment-page',
   template: `
     <div class="flex gap-4 justify-center">
@@ -35,6 +33,8 @@ import { PaymentSectionComponent } from './payment-section.component';
       ></my-bank-pay-qr-section>
     </div>
   `,
+  imports: [PaymentSectionComponent, PayQrSectionComponent],
+  standalone: true,
 })
 export class PaymentPageComponent {
   private readonly _matDialog = inject(MatDialog);

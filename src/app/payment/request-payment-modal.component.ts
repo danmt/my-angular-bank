@@ -1,7 +1,7 @@
 import { Component, inject } from '@angular/core';
-import { MatButtonModule } from '@angular/material/button';
+import { MatButton } from '@angular/material/button';
 import { MatDialogRef } from '@angular/material/dialog';
-import { MatIconModule } from '@angular/material/icon';
+import { MatIcon } from '@angular/material/icon';
 import {
   RequestPaymentFormComponent,
   RequestPaymentFormPayload,
@@ -23,8 +23,8 @@ import {
       ></my-bank-request-payment-form>
     </div>
   `,
+  imports: [MatButton, MatIcon, RequestPaymentFormComponent],
   standalone: true,
-  imports: [MatButtonModule, MatIconModule, RequestPaymentFormComponent],
 })
 export class RequestPaymentModalComponent {
   private readonly _matDialogRef = inject(

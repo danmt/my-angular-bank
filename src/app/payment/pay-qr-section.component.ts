@@ -1,10 +1,9 @@
-import { Component, HostBinding, Input } from '@angular/core';
-import { MatCardModule } from '@angular/material/card';
+import { Component, input } from '@angular/core';
+import { MatCard } from '@angular/material/card';
+import { LetDirective } from '@ngrx/component';
 import { QRCodeModule } from 'angularx-qrcode';
 
 @Component({
-  standalone: true,
-  imports: [MatCardModule, QRCodeModule],
   selector: 'my-bank-pay-qr-section',
   template: `
     <mat-card class="px-4 py-8 w-[400px] h-full">
@@ -12,7 +11,10 @@ import { QRCodeModule } from 'angularx-qrcode';
         <h2 class="text-3xl text-center">Pay using Solana Pay</h2>
       </header>
 
-      <div class="flex justify-center">
+      <div
+        class="flex justify-center"
+        *ngrxLet="solanaPayUrl() as solanaPayUrl"
+      >
         @if (solanaPayUrl !== null) {
           <qrcode
             [qrdata]="solanaPayUrl"
@@ -24,8 +26,9 @@ import { QRCodeModule } from 'angularx-qrcode';
       </div>
     </mat-card>
   `,
+  imports: [MatCard, LetDirective, QRCodeModule],
+  standalone: true,
 })
 export class PayQrSectionComponent {
-  @HostBinding() class = 'block';
-  @Input({ required: true }) solanaPayUrl: string | null = null;
+  readonly solanaPayUrl = input.required<string | null>();
 }

@@ -1,25 +1,12 @@
 import { DecimalPipe } from '@angular/common';
-import {
-  Component,
-  EventEmitter,
-  HostBinding,
-  Input,
-  Output,
-} from '@angular/core';
-import { MatButtonModule } from '@angular/material/button';
-import { MatCardModule } from '@angular/material/card';
-import { MatIconModule } from '@angular/material/icon';
+import { Component, EventEmitter, Output, input } from '@angular/core';
+import { MatButton } from '@angular/material/button';
+import { MatCard } from '@angular/material/card';
+import { MatIcon } from '@angular/material/icon';
+import { LetDirective } from '@ngrx/component';
 import { ToUserValuePipe } from '../shared';
 
 @Component({
-  standalone: true,
-  imports: [
-    DecimalPipe,
-    MatButtonModule,
-    MatCardModule,
-    MatIconModule,
-    ToUserValuePipe,
-  ],
   selector: 'my-bank-balance-section',
   template: `
     <mat-card class="px-4 py-8 w-[500px] h-full flex flex-col relative">
@@ -36,9 +23,9 @@ import { ToUserValuePipe } from '../shared';
       <div class="grow flex justify-center items-center gap-2 mb-4">
         <img src="assets/usdc-logo.png" class="w-24 h-24" />
 
-        <p class="text-7xl">
+        <p class="text-7xl" *ngrxLet="balance() as balance">
           @if (balance !== null) {
-            {{ balance | hdToUserValue | number: '2.2-2' }}
+            {{ balance | number: '2.2-2' }}
           } @else {
             -
           }
@@ -56,13 +43,21 @@ import { ToUserValuePipe } from '../shared';
       </footer>
     </mat-card>
   `,
+  imports: [
+    DecimalPipe,
+    MatButton,
+    MatCard,
+    MatIcon,
+    LetDirective,
+    ToUserValuePipe,
+  ],
+  standalone: true,
 })
 export class BalanceSectionComponent {
-  @HostBinding() class = 'block';
-  @Input({ required: true }) balance: number | null = null;
-  @Output() reload = new EventEmitter();
-  @Output() transfer = new EventEmitter();
-  @Output() requestPayment = new EventEmitter();
+  readonly balance = input.required<number | null>();
+  @Output() readonly reload = new EventEmitter();
+  @Output() readonly transfer = new EventEmitter();
+  @Output() readonly requestPayment = new EventEmitter();
 
   onReload() {
     this.reload.emit();

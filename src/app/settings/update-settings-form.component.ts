@@ -1,8 +1,8 @@
-import { Component, EventEmitter, Input, Output, inject } from '@angular/core';
+import { Component, EventEmitter, Output, inject, input } from '@angular/core';
 import { FormsModule, NgForm } from '@angular/forms';
-import { MatButtonModule } from '@angular/material/button';
-import { MatFormFieldModule } from '@angular/material/form-field';
-import { MatInputModule } from '@angular/material/input';
+import { MatButton } from '@angular/material/button';
+import { MatError, MatFormField, MatLabel } from '@angular/material/form-field';
+import { MatInput } from '@angular/material/input';
 import { MatSnackBar } from '@angular/material/snack-bar';
 
 export interface UpdateSettingsFormModel {
@@ -22,14 +22,10 @@ export interface UpdateSettingsFormPayload {
         <input
           matInput
           name="shyftApiKey"
-          [(ngModel)]="model.shyftApiKey"
+          [(ngModel)]="model().shyftApiKey"
           #shyftApiKeyControl="ngModel"
           required
         />
-        @if (form.submitted && shyftApiKeyControl.errors?.['required']) {
-          <mat-error> Shyft API Key is required. </mat-error>
-        }
-
         @if (form.submitted && shyftApiKeyControl.errors) {
           <mat-error>
             @if (shyftApiKeyControl.errors['required']) {
@@ -42,7 +38,7 @@ export interface UpdateSettingsFormPayload {
       <div>
         <button
           type="submit"
-          [disabled]="disabled"
+          [disabled]="disabled()"
           mat-raised-button
           color="primary"
         >
@@ -51,26 +47,29 @@ export interface UpdateSettingsFormPayload {
       </div>
     </form>
   `,
+  imports: [FormsModule, MatFormField, MatInput, MatLabel, MatError, MatButton],
   standalone: true,
-  imports: [FormsModule, MatFormFieldModule, MatInputModule, MatButtonModule],
 })
 export class UpdateSettingsFormComponent {
   private readonly _matSnackBar = inject(MatSnackBar);
 
-  @Input() model: UpdateSettingsFormModel = {
+  readonly model = input<UpdateSettingsFormModel>({
     shyftApiKey: null,
-  };
-  @Input() disabled = false;
-  @Output() updateSettings = new EventEmitter<UpdateSettingsFormPayload>();
+  });
+  readonly disabled = input(false);
+  @Output() readonly updateSettings =
+    new EventEmitter<UpdateSettingsFormPayload>();
 
   onSubmit(form: NgForm) {
-    if (form.invalid || this.model.shyftApiKey === null) {
+    const model = this.model();
+
+    if (form.invalid || model.shyftApiKey === null) {
       this._matSnackBar.open('Invalid data, review form entries.', 'close', {
         duration: 3000,
       });
     } else {
       this.updateSettings.emit({
-        shyftApiKey: this.model.shyftApiKey,
+        shyftApiKey: model.shyftApiKey,
       });
     }
   }

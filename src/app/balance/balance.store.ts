@@ -1,10 +1,9 @@
 import { Injectable, computed, inject, signal } from '@angular/core';
-import { ConnectionStore, WalletStore } from '@heavy-duty/wallet-adapter';
-import { getAccount, getAssociatedTokenAddressSync } from '@solana/spl-token';
-import { PublicKey } from '@solana/web3.js';
+import { WalletStore } from '@heavy-duty/wallet-adapter';
 import { computedFrom } from 'ngxtension/computed-from';
-import { catchError, from, map, of, startWith, switchMap } from 'rxjs';
-import { config, stringifyError } from '../utils';
+import { catchError, map, of, startWith, switchMap } from 'rxjs';
+import { ShyftApiService } from '../core';
+import { stringifyError } from '../utils';
 
 export interface BalanceState {
   balance: number | null;
@@ -14,27 +13,18 @@ export interface BalanceState {
 
 @Injectable()
 export class BalanceStore {
+  private readonly _shyftApiService = inject(ShyftApiService);
   private readonly _walletStore = inject(WalletStore);
-  private readonly _connectionStore = inject(ConnectionStore);
   private readonly _reload = signal(Date.now());
 
   readonly state = computedFrom(
-    [
-      this._walletStore.publicKey$,
-      this._connectionStore.connection$,
-      this._reload,
-    ],
-    switchMap(([publicKey, connection]) => {
-      if (!publicKey || !connection) {
+    [this._walletStore.publicKey$, this._reload],
+    switchMap(([publicKey]) => {
+      if (!publicKey) {
         return of({ isLoading: false as const, error: null, balance: 0 });
       }
 
-      const associatedTokenPubkey = getAssociatedTokenAddressSync(
-        new PublicKey(config.mint),
-        publicKey,
-      );
-
-      return from(getAccount(connection, associatedTokenPubkey)).pipe(
+      return this._shyftApiService.getAccount(publicKey).pipe(
         map((associatedTokenAccount) => ({
           isLoading: false as const,
           error: null,

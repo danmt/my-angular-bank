@@ -1,4 +1,5 @@
-import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
+import { Component, inject } from '@angular/core';
+import { toSignal } from '@angular/core/rxjs-interop';
 import { MatDialog } from '@angular/material/dialog';
 import { WalletStore } from '@heavy-duty/wallet-adapter';
 import { PublicKey } from '@solana/web3.js';
@@ -29,12 +30,6 @@ import { TransactionsSectionComponent } from './transactions-section.component';
 import { TransactionsStore } from './transactions.store';
 
 @Component({
-  standalone: true,
-  imports: [
-    BalanceSectionComponent,
-    DepositQrSectionComponent,
-    TransactionsSectionComponent,
-  ],
   selector: 'my-bank-balance-page',
   template: `
     <div class="flex gap-4 justify-center mb-4">
@@ -56,8 +51,13 @@ import { TransactionsStore } from './transactions.store';
       ></my-bank-transactions-section>
     </div>
   `,
+  imports: [
+    BalanceSectionComponent,
+    DepositQrSectionComponent,
+    TransactionsSectionComponent,
+  ],
   providers: [BalanceStore, TransactionsStore],
-  changeDetection: ChangeDetectionStrategy.OnPush,
+  standalone: true,
 })
 export class BalancePageComponent {
   private readonly _matDialog = inject(MatDialog);
@@ -80,6 +80,9 @@ export class BalancePageComponent {
       });
     }),
   );
+  readonly publicKey = toSignal(this._walletStore.publicKey$, {
+    initialValue: null,
+  });
   readonly transactions = this._transactionsStore.transactions;
 
   onReload() {

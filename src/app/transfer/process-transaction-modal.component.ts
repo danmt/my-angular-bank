@@ -1,14 +1,7 @@
-import {
-  Component,
-  Injector,
-  OnInit,
-  computed,
-  effect,
-  inject,
-} from '@angular/core';
-import { MatButtonModule } from '@angular/material/button';
+import { Component, computed, inject } from '@angular/core';
+import { MatButton } from '@angular/material/button';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
-import { MatIconModule } from '@angular/material/icon';
+import { MatIcon } from '@angular/material/icon';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { ConnectionStore, WalletStore } from '@heavy-duty/wallet-adapter';
 import { SendTransactionOptions } from '@solana/wallet-adapter-base';
@@ -19,7 +12,7 @@ import {
   VersionedTransaction,
 } from '@solana/web3.js';
 import { firstValueFrom } from 'rxjs';
-import { createTransactionSender } from '../utils';
+import { createExplorerUrl, createTransactionSender } from '../utils';
 import { ProcessTransactionSectionComponent } from './process-transaction-section.component';
 
 export interface ProcessTransactionModalData {
@@ -31,7 +24,8 @@ export interface ProcessTransactionModalData {
   template: `
     <header class="flex gap-4 items-center px-4 pt-4">
       <h2 class="grow">
-        {{ title() }}
+        <span class="capitalize"> {{ transactionSender().status }} </span>
+        Transaction
       </h2>
       <button (click)="onClose()" mat-icon-button [disabled]="isRunning()">
         <mat-icon> close </mat-icon>
@@ -40,18 +34,15 @@ export interface ProcessTransactionModalData {
 
     <div class="p-4 min-w-[350px] max-w-[450px]">
       <my-bank-process-transaction-section
-        [signature]="signature()"
-        [error]="error()"
-        [status]="status()"
-        [explorerUrl]="explorerUrl()"
+        [transactionState]="transactionSender()"
+        (sendTransaction)="onSendTransaction()"
       ></my-bank-process-transaction-section>
     </div>
   `,
+  imports: [MatButton, MatIcon, ProcessTransactionSectionComponent],
   standalone: true,
-  imports: [MatButtonModule, MatIconModule, ProcessTransactionSectionComponent],
 })
-export class ProcessTransactionModalComponent implements OnInit {
-  private readonly _injector = inject(Injector);
+export class ProcessTransactionModalComponent {
   private readonly _matDialogRef = inject(
     MatDialogRef<ProcessTransactionModalComponent>,
   );
@@ -67,38 +58,13 @@ export class ProcessTransactionModalComponent implements OnInit {
       options?: SendTransactionOptions,
     ) => this._walletStore.sendTransaction(transaction, connection, options),
   );
-  readonly error = computed(() => this.transactionSender().error);
   readonly isRunning = computed(
     () =>
-      this.transactionSender().status !== 'confirmed' &&
-      this.transactionSender().status !== 'failed',
-  );
-  readonly status = computed(() => this.transactionSender().status);
-  readonly signature = computed(() => this.transactionSender().signature);
-  readonly title = computed(() => {
-    switch (this.status()) {
-      case 'pending': {
-        return 'Pending Transaction';
-      }
-      case 'sending': {
-        return 'Sending Transaction';
-      }
-      case 'confirming': {
-        return 'Confirming Transaction';
-      }
-      case 'failed': {
-        return 'Failed Transaction';
-      }
-      case 'confirmed': {
-        return 'Successful Transaction';
-      }
-    }
-  });
-  readonly explorerUrl = computed(
-    () => `https://explorer.solana.com/tx/${this.signature()}`,
+      this.transactionSender().status === 'sending' ||
+      this.transactionSender().status === 'confirming',
   );
 
-  async ngOnInit() {
+  async onSendTransaction() {
     const connection = await firstValueFrom(this._connectionStore.connection$);
 
     if (connection === null) {
@@ -111,56 +77,37 @@ export class ProcessTransactionModalComponent implements OnInit {
       throw new Error('Public Key not available.');
     }
 
-    this.transactionSender.send(
-      connection,
-      publicKey,
-      this._data.transactionInstructions,
-    );
+    this._matDialogRef.disableClose = true;
 
-    const handleStatusUpdates = effect(
-      () => {
-        if (this.status() === 'confirmed') {
-          // Log in the console the result.
-          console.log(
-            '🎉 Transaction Succesfully Confirmed!',
-            '\n',
-            this.explorerUrl(),
-          );
+    try {
+      const signature = await this.transactionSender.send(
+        connection,
+        publicKey,
+        this._data.transactionInstructions,
+      );
 
-          // Display a toast notification.
-          this._matSnackBar.open(
-            'Transaction successfully confirmed.',
-            'close',
-            {
-              duration: 3000,
-            },
-          );
+      // Log in the console the result.
+      console.log(
+        '🎉 Transaction Succesfully Confirmed!',
+        '\n',
+        createExplorerUrl(signature),
+      );
 
-          // Allow users closing the modal.
-          this._matDialogRef.disableClose = false;
+      // Display a toast notification.
+      this._matSnackBar.open('Transaction successfully confirmed.', 'close', {
+        duration: 3000,
+      });
+    } catch (error) {
+      // Log in the console the error.
+      console.error(error);
 
-          // Destroy the effect.
-          handleStatusUpdates.destroy();
-        } else if (this.status() === 'failed') {
-          // Log in the console the error.
-          console.error(this.error());
-
-          // Display a toast notification.
-          this._matSnackBar.open('An error occurred.', 'close', {
-            duration: 3000,
-          });
-
-          // Allow users closing the modal.
-          this._matDialogRef.disableClose = false;
-
-          // Destroy the effect.
-          handleStatusUpdates.destroy();
-        } else {
-          this._matDialogRef.disableClose = true;
-        }
-      },
-      { injector: this._injector },
-    );
+      // Display a toast notification.
+      this._matSnackBar.open('An error occurred.', 'close', {
+        duration: 3000,
+      });
+    } finally {
+      this._matDialogRef.disableClose = false;
+    }
   }
 
   onClose() {
